@@ -1,0 +1,19 @@
+{
+  "testEnvironment": "node",
+  "testMatch": ["**/__tests__/**/*.test.js"],
+  "moduleNameMapper": { "^uuid$": "<rootDir>/__mocks__/uuid.js" },
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "controllers/**/*.js",
+    "middleware/**/*.js",
+    "utilities/**/*.js",
+    "!middleware/logger.js",
+    "!middleware/loginLimit.js"
+  ],
+  "coverageThreshold": {
+    "global": { "statements": 90, "branches": 80, "functions": 90, "lines": 90 }
+  },
+  "coverageProvider": "v8",
+  "coverageReporters": ["text", "html"],
+  "coverageDirectory": "coverage"
+}

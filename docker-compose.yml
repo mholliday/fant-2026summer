@@ -1,0 +1,38 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override .env's localhost so the container reaches the mongo service
+      - BONES_DB_URI=mongodb://mongo:27017/bonesdb
+    depends_on:
+      - mongo
+    networks:
+      - bonesdb
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api/v2/
+    networks:
+      - bonesdb
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - bonesdb
+
+volumes:
+  mongo_data:
+
+networks:
+  bonesdb:

@@ -3,6 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button, Form, Spinner, Alert, Card, Stack, Table, Collapse } from "react-bootstrap";
 import { useAPI } from "../contexts/AppContext";
 import { toDBSchema } from "../services/donorDataService";
+import {
+  ANALYSIS_FIELDS,
+  ELEMENT_GROUPS,
+  elemKey,
+  defaultElementInventory,
+  defaultAnalysis,
+} from "../services/williamsForm";
+import Homunculus from "./Homunculus";
 
 const OSTEOMETRY_FIELDS = {
   cranium: [
@@ -200,6 +208,8 @@ const defaultDonorData = () => ({
     general_observations: "",
     trauma_and_pathological_analysis: "",
   },
+  analysis: defaultAnalysis(),
+  element_inventory: defaultElementInventory(),
 });
 
 const ModifyDonor = ({ create = false }) => {
@@ -212,7 +222,7 @@ const ModifyDonor = ({ create = false }) => {
   const [loading, setLoading] = useState(!create);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [open, setOpen] = useState({ donorID: true, identification: true, skeleton: false, dentition: false, osteometry: false, notes: false });
+  const [open, setOpen] = useState({ donorID: true, identification: true, analysis: false, element_inventory: false, skeleton: false, dentition: false, osteometry: false, notes: false });
   const toggle = (s) => setOpen(prev => ({ ...prev, [s]: !prev[s] }));
 
   useEffect(() => {
@@ -229,6 +239,8 @@ const ModifyDonor = ({ create = false }) => {
         saved.osteometry = { ...defaultDonorData().osteometry, ...(saved.osteometry ?? {}) };
         saved.skeleton = { ...defaultSkeleton(), ...(saved.skeleton ?? {}) };
         if (!saved.dentition?.teeth) saved.dentition = { teeth: Array(32).fill("N") };
+        saved.analysis = { ...defaultAnalysis(), ...(saved.analysis ?? {}) };
+        saved.element_inventory = { ...defaultElementInventory(), ...(saved.element_inventory ?? {}) };
         setDonorData(saved);
       } catch (err) {
         setError("Failed to load donor");
@@ -244,6 +256,18 @@ const ModifyDonor = ({ create = false }) => {
 
   const handleNotesChange = (field, value) =>
     setDonorData((prev) => ({ ...prev, notes: { ...prev.notes, [field]: value } }));
+
+  const handleAnalysisChange = (field, value) =>
+    setDonorData((prev) => ({ ...prev, analysis: { ...prev.analysis, [field]: value } }));
+
+  const handleInventoryChange = (key, patch) =>
+    setDonorData((prev) => ({
+      ...prev,
+      element_inventory: {
+        ...prev.element_inventory,
+        [key]: { ...prev.element_inventory[key], ...patch },
+      },
+    }));
 
   const handleOsteometryChange = (key, value) =>
     setDonorData((prev) => ({ ...prev, osteometry: { ...prev.osteometry, [key]: value } }));
@@ -283,6 +307,8 @@ const ModifyDonor = ({ create = false }) => {
   const notes = donorData.notes;
   const osteometry = donorData.osteometry;
   const skeleton = donorData.skeleton;
+  const analysis = donorData.analysis ?? defaultAnalysis();
+  const inventory = donorData.element_inventory ?? defaultElementInventory();
   const teeth = donorData.dentition?.teeth ?? Array(32).fill("N");
 
   const CodeSelect = ({ field, placeholder = "—" }) => (
@@ -363,6 +389,85 @@ const ModifyDonor = ({ create = false }) => {
                 <Form.Group className="mt-4">
                   <Form.Check type="checkbox" label="Autopsy performed" checked={!!id.autopsy} onChange={(e) => handleIdentChange("autopsy", e.target.checked)} />
                 </Form.Group>
+              </div>
+            </div>
+          </Card.Body>
+          </div></Collapse>
+        </Card>
+
+        {/* Analysis Header (Williams form) */}
+        <Card className="mb-3">
+          <Card.Header onClick={() => toggle("analysis")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center">
+            <span><strong>Analysis</strong><span className="text-muted fw-normal ms-2 small">Williams Collection lab form header</span></span>
+            <span className="text-muted">{open.analysis ? "▲" : "▼"}</span>
+          </Card.Header>
+          <Collapse in={open.analysis}><div>
+          <Card.Body>
+            <div className="row g-3">
+              {ANALYSIS_FIELDS.map((f) => (
+                <div key={f.key} className={f.type === "textarea" ? "col-12" : "col-md-4"}>
+                  <Form.Group>
+                    <Form.Label className="small mb-1">{f.label}</Form.Label>
+                    {f.type === "textarea" ? (
+                      <Form.Control as="textarea" rows={2} value={analysis[f.key] ?? ""} onChange={(e) => handleAnalysisChange(f.key, e.target.value)} />
+                    ) : (
+                      <Form.Control size="sm" type={f.type === "date" ? "date" : "text"} value={analysis[f.key] ?? ""} onChange={(e) => handleAnalysisChange(f.key, e.target.value)} />
+                    )}
+                  </Form.Group>
+                </div>
+              ))}
+            </div>
+          </Card.Body>
+          </div></Collapse>
+        </Card>
+
+        {/* Element Inventory (Present/Absent/Observations) + Homunculus */}
+        <Card className="mb-3">
+          <Card.Header onClick={() => toggle("element_inventory")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center">
+            <span><strong>Element Inventory</strong><span className="text-muted fw-normal ms-2 small">Present / Absent &amp; observations per element</span></span>
+            <span className="text-muted">{open.element_inventory ? "▲" : "▼"}</span>
+          </Card.Header>
+          <Collapse in={open.element_inventory}><div>
+          <Card.Body>
+            <div className="row">
+              <div className="col-lg-9">
+                {ELEMENT_GROUPS.map((group) => (
+                  <div key={group.key} className="mb-3">
+                    <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">{group.label}</h6>
+                    <Table size="sm" bordered className="mb-0">
+                      <thead>
+                        <tr>
+                          <th style={{ width: "30%" }}>Element</th>
+                          <th className="text-center" style={{ width: 80 }}>Absent</th>
+                          <th>Other Observations</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {group.elements.map((el) => {
+                          const k = elemKey(group.key, el.key);
+                          const cell = inventory[k] ?? { absent: false, obs: "" };
+                          return (
+                            <tr key={k}>
+                              <td className="small fw-semibold">{el.label}</td>
+                              <td className="text-center">
+                                <Form.Check type="checkbox" checked={!!cell.absent} onChange={(e) => handleInventoryChange(k, { absent: e.target.checked })} />
+                              </td>
+                              <td>
+                                <Form.Control size="sm" value={cell.obs ?? ""} onChange={(e) => handleInventoryChange(k, { obs: e.target.value })} />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
+                  </div>
+                ))}
+              </div>
+              <div className="col-lg-3">
+                <div className="position-sticky" style={{ top: 16 }}>
+                  <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Homunculus</h6>
+                  <Homunculus inventory={inventory} />
+                </div>
               </div>
             </div>
           </Card.Body>

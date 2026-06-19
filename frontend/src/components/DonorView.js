@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button, Stack, Spinner, Alert, Badge, Card, Table, Collapse } from "react-bootstrap";
 import { useAuth, useAPI } from "../contexts/AppContext";
+import { ANALYSIS_FIELDS, ELEMENT_GROUPS, elemKey } from "../services/williamsForm";
+import Homunculus from "./Homunculus";
 
 const OSTEOMETRY_FIELDS = {
   cranium: [
@@ -250,6 +252,11 @@ const DonorView = () => {
   const notes      = donor.data?.notes ?? {};
   const skeleton   = donor.data?.skeleton ?? {};
   const teeth      = donor.data?.dentition?.teeth ?? Array(32).fill("N");
+  const analysis   = donor.data?.analysis ?? {};
+  const inventory  = donor.data?.element_inventory ?? {};
+  const hasAnalysis  = ANALYSIS_FIELDS.some(f => analysis[f.key]);
+  const hasInventory = Object.keys(inventory).length > 0;
+  const refBase = `${(api?.url || "/api/v2/").replace(/\/$/, "")}/reference/`;
 
   const groupHasData = (fields) =>
     fields.some(({ key }) => osteometry[key] !== "" && osteometry[key] != null);
@@ -312,6 +319,87 @@ const DonorView = () => {
           </Table>
         </div>
       </div>
+
+      {/* Reference Forms (blank originals) */}
+      <div className="mb-3">
+        <h5>Reference Forms</h5>
+        <Stack direction="horizontal" gap={2}>
+          <Button size="sm" variant="outline-secondary" href={`${refBase}skeletal-inventory.pdf`} target="_blank" rel="noreferrer">
+            SKELETAL INVENTORY.pdf
+          </Button>
+          <Button size="sm" variant="outline-secondary" href={`${refBase}williams-collection-forms.docx`} target="_blank" rel="noreferrer">
+            Williams Collection Forms (.docx)
+          </Button>
+        </Stack>
+      </div>
+
+      {/* Analysis (Williams form header) */}
+      {hasAnalysis && (
+        <div className="mb-3">
+          <h5>Analysis</h5>
+          <Table size="sm" bordered>
+            <tbody>
+              {ANALYSIS_FIELDS.filter(f => analysis[f.key]).map(f => (
+                <tr key={f.key}>
+                  <td className="fw-semibold" style={{ width: "30%" }}>{f.label}</td>
+                  <td style={{ whiteSpace: "pre-wrap" }}>{analysis[f.key]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      )}
+
+      {/* Element Inventory (Present/Absent) + Homunculus */}
+      {hasInventory && (
+        <div className="mb-4">
+          <Card className="mb-2">
+            <Card.Header onClick={() => toggleGroup("_inventory")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center py-2">
+              <span className="fw-semibold">Element Inventory</span>
+              <span className="text-muted">{openGroups["_inventory"] ? "▲" : "▼"}</span>
+            </Card.Header>
+          </Card>
+          <Collapse in={!!openGroups["_inventory"]}>
+            <div>
+              <div className="row">
+                <div className="col-lg-9">
+                  {ELEMENT_GROUPS.map(group => (
+                    <Card key={group.key} className="mb-2">
+                      <Card.Header className="py-2 fw-semibold small">{group.label}</Card.Header>
+                      <Card.Body className="p-0">
+                        <Table size="sm" className="mb-0">
+                          <tbody>
+                            {group.elements.map(el => {
+                              const cell = inventory[elemKey(group.key, el.key)] ?? { absent: false, obs: "" };
+                              return (
+                                <tr key={el.key}>
+                                  <td className="small fw-semibold" style={{ width: "30%" }}>{el.label}</td>
+                                  <td style={{ width: 90 }}>
+                                    <Badge bg={cell.absent ? "secondary" : "success"}>{cell.absent ? "Absent" : "Present"}</Badge>
+                                  </td>
+                                  <td className="small text-muted">{cell.obs || ""}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </Table>
+                      </Card.Body>
+                    </Card>
+                  ))}
+                </div>
+                <div className="col-lg-3">
+                  <div className="position-sticky" style={{ top: 16 }}>
+                    <Card>
+                      <Card.Header className="py-2 fw-semibold small">Homunculus</Card.Header>
+                      <Card.Body><Homunculus inventory={inventory} /></Card.Body>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Collapse>
+        </div>
+      )}
 
       {/* Skeletal Inventory */}
       <div className="mb-4">

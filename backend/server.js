@@ -3,6 +3,7 @@
  * Modernized: native MongoDB driver replaced with Mongoose
  */
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -20,6 +21,9 @@ app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+// Blank reference forms (skeletal inventory PDF, Williams collection forms)
+app.use("/api/v2/reference", express.static(path.join(__dirname, "reference")));
 
 // Routes
 app.use("/api/v2/donor", require("./routes/donorRoutes"));

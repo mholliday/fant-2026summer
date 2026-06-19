@@ -7,13 +7,27 @@
 // sk.upper_limbs, …) that never existed in the saved data (which is flat) and
 // were never rendered, so exported PDFs contained no bone inventory at all.
 // This version reads the same flat schema the UI uses.
+const fs = require("fs");
+const path = require("path");
 const {
   ANALYSIS_FIELDS,
   ELEMENT_GROUPS,
-  HOMUNCULUS_REGIONS,
+  absentBoneIds,
   OSTEOMETRY_FIELDS,
   elemKey,
 } = require("./williamsData");
+
+// Public-domain anatomical skeleton (LadyofHats, Wikimedia Commons). Loaded
+// once; absent bones are recoloured via an injected <style> per donor.
+const SKELETON_SVG = (() => {
+  try {
+    return fs.readFileSync(path.join(__dirname, "..", "assets", "skeleton.svg"), "utf8")
+      .replace(/<\?xml[\s\S]*?\?>/, "")
+      .replace(/<!DOCTYPE[\s\S]*?>/, "");
+  } catch {
+    return "";
+  }
+})();
 
 // --- Flat skeletal-inventory schema (mirrors the UI) ----------------------
 const SKULL_SINGLES = [["frontal","Frontal"],["occipital","Occipital"],["ethmoid","Ethmoid"],["vomer","Vomer"],["sphenoid","Sphenoid"],["mandible","Mandible"]];
@@ -37,11 +51,6 @@ const generateHtml = (donor) => {
   const analysis = d.analysis ?? {};
   const inventory = d.element_inventory ?? {};
   const osteo = d.osteometry ?? {};
-
-  const present = ([g, e]) => {
-    const cell = inventory[elemKey(g, e)];
-    return cell ? !cell.absent : false;
-  };
 
   // ---- Skeletal inventory bone tables (page 1) ----
   const singleCell = (k, label) => `<td class="bone"><span class="lbl">${label}</span><span class="v">${code(sk[k])}</span></td>`;
@@ -89,32 +98,15 @@ const generateHtml = (donor) => {
     return `<table class="inv"><tr><th class="lbl">${esc(group.label)}</th><th class="num">P/A</th><th>Observations</th></tr>${body}</table>`;
   }).join("");
 
-  // ---- Homunculus SVG ----
-  const boneSVG = (s, fill) => {
-    if (s.double) {
-      const hw = s.w * 0.46;
-      return boneSVG({ ...s, w: hw, double: false }, fill) +
-             boneSVG({ ...s, x: s.x + s.w - hw, w: hw, double: false }, fill);
-    }
-    const cx = s.x + s.w / 2, knobR = s.w * 0.4, off = s.w * 0.2, shaftW = s.w * 0.42;
-    const a = `fill="${fill}" stroke="#6c757d"`;
-    const lobe = (lx, ly) => `<ellipse cx="${lx}" cy="${ly}" rx="${knobR}" ry="${knobR * 0.85}" ${a}/>`;
-    return `<rect x="${cx - shaftW / 2}" y="${s.y + knobR}" width="${shaftW}" height="${s.h - 2 * knobR}" rx="${shaftW / 2}" ${a}/>` +
-      lobe(cx - off, s.y + knobR) + lobe(cx + off, s.y + knobR) +
-      lobe(cx - off, s.y + s.h - knobR) + lobe(cx + off, s.y + s.h - knobR);
-  };
-  const shapeSVG = (s, fill) => {
-    const a = `fill="${fill}" stroke="#6c757d"`;
-    if (s.type === "path") return `<path d="${s.d}" ${a}/>`;
-    if (s.type === "bone") return boneSVG(s, fill);
-    if (s.type === "ellipse") return `<ellipse cx="${s.cx}" cy="${s.cy}" rx="${s.rx}" ry="${s.ry}" ${a}/>`;
-    return `<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="${s.rx}" ${a}/>`;
-  };
-  const homunculus = `<svg viewBox="0 0 200 410" width="180" height="370">${
-    HOMUNCULUS_REGIONS.map((r) =>
-      shapeSVG(r.shape, r.elements.some(present) ? "#5b3f8c" : "#e9ecef")
-    ).join("")
-  }</svg>`;
+  // ---- Anatomical skeleton figure with absent bones reddened ----
+  const absentIds = absentBoneIds(inventory);
+  const homunculusStyle = absentIds
+    .map((id) => `.homunculus #${id}, .homunculus #${id} * { fill: #c0392b !important; stroke: #7b241c !important; }`)
+    .join("\n");
+  const homunculus = SKELETON_SVG
+    ? `<style>.homunculus svg { max-height: 540px; width: auto; } ${homunculusStyle}</style>
+       <div class="homunculus">${SKELETON_SVG}</div>`
+    : "";
 
   // ---- Osteometry table ----
   const osteometryTables = Object.entries(OSTEOMETRY_FIELDS).map(([group, fields]) => {

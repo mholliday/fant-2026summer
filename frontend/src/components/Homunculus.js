@@ -1,61 +1,36 @@
-import React from "react";
-import { HOMUNCULUS_REGIONS, elemKey } from "../services/williamsForm";
+import React, { useMemo } from "react";
+import skeletonRaw from "../assets/skeleton.svg?raw";
+import { absentBoneIds, ABSENT_FILL, ABSENT_STROKE } from "../services/williamsForm";
 
-// Schematic skeletal homunculus. A region is shaded ("present") when at least
-// one of its mapped elements is not marked absent in the inventory. This is a
-// diagrammatic representation of presence/absence, not an anatomical drawing.
-const PRESENT_FILL = "#5b3f8c";  // WCU-ish purple
-const ABSENT_FILL = "#e9ecef";
-const STROKE = "#6c757d";
+// Strip the XML prolog / DOCTYPE so the markup is valid inline in HTML.
+const skeletonSvg = skeletonRaw.replace(/<\?xml[\s\S]*?\?>/, "").replace(/<!DOCTYPE[\s\S]*?>/, "");
 
-const regionPresent = (region, inventory) =>
-  region.elements.some(([g, e]) => {
-    const cell = inventory?.[elemKey(g, e)];
-    return cell ? !cell.absent : false;
-  });
+// Renders the public-domain anatomical skeleton (LadyofHats, Wikimedia Commons)
+// and reddens any bone whose inventory elements are all marked absent. The base
+// figure is injected once (constant markup); only the <style> block changes as
+// the inventory changes, so toggling absence doesn't re-parse the whole SVG.
+const Homunculus = ({ inventory = {} }) => {
+  const css = useMemo(() => {
+    const ids = absentBoneIds(inventory);
+    if (!ids.length) return "";
+    return ids
+      .map((id) => `.homunculus #${id}, .homunculus #${id} * { fill: ${ABSENT_FILL} !important; stroke: ${ABSENT_STROKE} !important; }`)
+      .join("\n");
+  }, [inventory]);
 
-// A long bone: a slim shaft capped by paired epiphyseal knobs at each end.
-const boneEls = (shape, common, kp) => {
-  const { x, y, w, h, double } = shape;
-  if (double) {
-    const hw = w * 0.46;
-    return [
-      ...boneEls({ x, y, w: hw, h }, common, kp + "a"),
-      ...boneEls({ x: x + w - hw, y, w: hw, h }, common, kp + "b"),
-    ];
-  }
-  const cx = x + w / 2;
-  const knobR = w * 0.4;
-  const off = w * 0.2;
-  const shaftW = w * 0.42;
-  const lobe = (lx, ly, i) => <ellipse key={kp + i} cx={lx} cy={ly} rx={knobR} ry={knobR * 0.85} {...common} />;
-  return [
-    <rect key={kp + "s"} x={cx - shaftW / 2} y={y + knobR} width={shaftW} height={h - 2 * knobR} rx={shaftW / 2} {...common} />,
-    lobe(cx - off, y + knobR, "1"), lobe(cx + off, y + knobR, "2"),
-    lobe(cx - off, y + h - knobR, "3"), lobe(cx + off, y + h - knobR, "4"),
-  ];
-};
-
-const renderShape = (shape, fill, kp) => {
-  const common = { fill, stroke: STROKE, strokeWidth: 1 };
-  if (shape.type === "path") return <path key={kp} d={shape.d} {...common} />;
-  if (shape.type === "bone") return <g key={kp}>{boneEls(shape, common, kp)}</g>;
-  if (shape.type === "ellipse") return <ellipse key={kp} cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry} {...common} />;
-  return <rect key={kp} x={shape.x} y={shape.y} width={shape.w} height={shape.h} rx={shape.rx} {...common} />;
-};
-
-const Homunculus = ({ inventory = {} }) => (
-  <div className="text-center">
-    <svg viewBox="0 0 200 410" width="200" height="410" role="img" aria-label="Skeletal inventory homunculus">
-      {HOMUNCULUS_REGIONS.map((region) =>
-        renderShape(region.shape, regionPresent(region, inventory) ? PRESENT_FILL : ABSENT_FILL, region.id)
-      )}
-    </svg>
-    <div className="d-flex justify-content-center gap-3 small mt-1">
-      <span><span style={{ display: "inline-block", width: 12, height: 12, background: PRESENT_FILL, border: `1px solid ${STROKE}`, verticalAlign: "middle" }} /> Present</span>
-      <span><span style={{ display: "inline-block", width: 12, height: 12, background: ABSENT_FILL, border: `1px solid ${STROKE}`, verticalAlign: "middle" }} /> Absent</span>
+  return (
+    <div className="homunculus text-center">
+      <style>{`.homunculus svg { display: block; margin: 0 auto; max-width: 100%; height: auto; max-height: 460px; }\n${css}`}</style>
+      <div dangerouslySetInnerHTML={{ __html: skeletonSvg }} />
+      <div className="d-flex justify-content-center gap-3 small mt-1">
+        <span><span style={{ display: "inline-block", width: 12, height: 12, background: ABSENT_FILL, border: `1px solid ${ABSENT_STROKE}`, verticalAlign: "middle" }} /> Absent</span>
+        <span><span style={{ display: "inline-block", width: 12, height: 12, background: "#f3d48c", border: "1px solid #967348", verticalAlign: "middle" }} /> Present / intact</span>
+      </div>
+      <div className="text-muted mt-1" style={{ fontSize: "0.7rem" }}>
+        Figure: public domain (M. Ruiz Villarreal, Wikimedia Commons)
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Homunculus;

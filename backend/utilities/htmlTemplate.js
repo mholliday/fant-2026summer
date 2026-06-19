@@ -90,14 +90,30 @@ const generateHtml = (donor) => {
   }).join("");
 
   // ---- Homunculus SVG ----
+  const boneSVG = (s, fill) => {
+    if (s.double) {
+      const hw = s.w * 0.46;
+      return boneSVG({ ...s, w: hw, double: false }, fill) +
+             boneSVG({ ...s, x: s.x + s.w - hw, w: hw, double: false }, fill);
+    }
+    const cx = s.x + s.w / 2, knobR = s.w * 0.4, off = s.w * 0.2, shaftW = s.w * 0.42;
+    const a = `fill="${fill}" stroke="#6c757d"`;
+    const lobe = (lx, ly) => `<ellipse cx="${lx}" cy="${ly}" rx="${knobR}" ry="${knobR * 0.85}" ${a}/>`;
+    return `<rect x="${cx - shaftW / 2}" y="${s.y + knobR}" width="${shaftW}" height="${s.h - 2 * knobR}" rx="${shaftW / 2}" ${a}/>` +
+      lobe(cx - off, s.y + knobR) + lobe(cx + off, s.y + knobR) +
+      lobe(cx - off, s.y + s.h - knobR) + lobe(cx + off, s.y + s.h - knobR);
+  };
+  const shapeSVG = (s, fill) => {
+    const a = `fill="${fill}" stroke="#6c757d"`;
+    if (s.type === "path") return `<path d="${s.d}" ${a}/>`;
+    if (s.type === "bone") return boneSVG(s, fill);
+    if (s.type === "ellipse") return `<ellipse cx="${s.cx}" cy="${s.cy}" rx="${s.rx}" ry="${s.ry}" ${a}/>`;
+    return `<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="${s.rx}" ${a}/>`;
+  };
   const homunculus = `<svg viewBox="0 0 200 410" width="180" height="370">${
-    HOMUNCULUS_REGIONS.map((r) => {
-      const fill = r.elements.some(present) ? "#5b3f8c" : "#e9ecef";
-      const s = r.shape;
-      return s.type === "ellipse"
-        ? `<ellipse cx="${s.cx}" cy="${s.cy}" rx="${s.rx}" ry="${s.ry}" fill="${fill}" stroke="#6c757d"/>`
-        : `<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="${s.rx}" fill="${fill}" stroke="#6c757d"/>`;
-    }).join("")
+    HOMUNCULUS_REGIONS.map((r) =>
+      shapeSVG(r.shape, r.elements.some(present) ? "#5b3f8c" : "#e9ecef")
+    ).join("")
   }</svg>`;
 
   // ---- Osteometry table ----

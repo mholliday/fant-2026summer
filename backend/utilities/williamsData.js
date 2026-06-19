@@ -56,24 +56,27 @@ const ELEMENT_GROUPS = [
 
 const elemKey = (groupKey, elementKey) => `${groupKey}__${elementKey}`;
 
+// Anatomically-suggestive front-view skeleton. Shapes: "path" (raw SVG path)
+// or "bone" (long bone with knobby ends; `double` = parallel pair). Mirrors
+// HOMUNCULUS_REGIONS in frontend/src/services/williamsForm.js.
 const HOMUNCULUS_REGIONS = [
-  { shape: { type: "ellipse", cx: 100, cy: 34, rx: 26, ry: 30 }, elements: [["cranium", "vault"], ["cranium", "basicranium"], ["cranium", "facial"]] },
-  { shape: { type: "ellipse", cx: 100, cy: 64, rx: 18, ry: 9 }, elements: [["cranium", "mandible"]] },
-  { shape: { type: "rect", x: 94, y: 74, w: 12, h: 120, rx: 5 }, elements: [["axial", "c3_7"], ["axial", "t2_9"], ["axial", "l1_4"], ["axial", "sacrum"]] },
-  { shape: { type: "rect", x: 66, y: 84, w: 68, h: 70, rx: 18 }, elements: [["axial", "ribs_l"], ["axial", "ribs_r"]] },
-  { shape: { type: "rect", x: 74, y: 188, w: 52, h: 28, rx: 12 }, elements: [["left_leg", "innominate"], ["right_leg", "innominate"], ["axial", "sacrum"]] },
-  { shape: { type: "rect", x: 50, y: 90, w: 11, h: 64, rx: 5 }, elements: [["right_arm", "humerus"]] },
-  { shape: { type: "rect", x: 44, y: 154, w: 11, h: 58, rx: 5 }, elements: [["right_arm", "radius"], ["right_arm", "ulna"]] },
-  { shape: { type: "ellipse", cx: 46, cy: 222, rx: 9, ry: 12 }, elements: [["right_arm", "metacarpals"], ["right_arm", "phalanges_prox"]] },
-  { shape: { type: "rect", x: 139, y: 90, w: 11, h: 64, rx: 5 }, elements: [["left_arm", "humerus"]] },
-  { shape: { type: "rect", x: 145, y: 154, w: 11, h: 58, rx: 5 }, elements: [["left_arm", "radius"], ["left_arm", "ulna"]] },
-  { shape: { type: "ellipse", cx: 154, cy: 222, rx: 9, ry: 12 }, elements: [["left_arm", "metacarpals"], ["left_arm", "phalanges_prox"]] },
-  { shape: { type: "rect", x: 80, y: 218, w: 13, h: 80, rx: 6 }, elements: [["right_leg", "femur"]] },
-  { shape: { type: "rect", x: 80, y: 298, w: 13, h: 78, rx: 6 }, elements: [["right_leg", "tibia"], ["right_leg", "fibula"]] },
-  { shape: { type: "ellipse", cx: 86, cy: 388, rx: 12, ry: 9 }, elements: [["right_leg", "calcaneus"], ["right_leg", "talus"], ["right_leg", "metatarsals"]] },
-  { shape: { type: "rect", x: 107, y: 218, w: 13, h: 80, rx: 6 }, elements: [["left_leg", "femur"]] },
-  { shape: { type: "rect", x: 107, y: 298, w: 13, h: 78, rx: 6 }, elements: [["left_leg", "tibia"], ["left_leg", "fibula"]] },
-  { shape: { type: "ellipse", cx: 114, cy: 388, rx: 12, ry: 9 }, elements: [["left_leg", "calcaneus"], ["left_leg", "talus"], ["left_leg", "metatarsals"]] },
+  { shape: { type: "path", d: "M100 9 C82 9 70 23 70 39 C70 51 78 60 100 62 C122 60 130 51 130 39 C130 23 118 9 100 9 Z" }, elements: [["cranium", "vault"], ["cranium", "basicranium"], ["cranium", "facial"]] },
+  { shape: { type: "path", d: "M79 56 C84 71 116 71 121 56 C117 67 109 72 100 72 C91 72 83 67 79 56 Z" }, elements: [["cranium", "mandible"]] },
+  { shape: { type: "path", d: "M96 62 L104 62 L106 196 L94 196 Z" }, elements: [["axial", "c3_7"], ["axial", "t2_9"], ["axial", "l1_4"], ["axial", "sacrum"]] },
+  { shape: { type: "path", d: "M100 80 C74 82 66 104 68 128 C70 150 84 166 100 168 C116 166 130 150 132 128 C134 104 126 82 100 80 Z" }, elements: [["axial", "ribs_l"], ["axial", "ribs_r"]] },
+  { shape: { type: "path", d: "M70 188 C68 206 82 222 100 220 C118 222 132 206 130 188 C122 200 110 202 100 200 C90 202 78 200 70 188 Z" }, elements: [["left_leg", "innominate"], ["right_leg", "innominate"], ["axial", "sacrum"]] },
+  { shape: { type: "bone", x: 46, y: 90, w: 14, h: 66 }, elements: [["right_arm", "humerus"]] },
+  { shape: { type: "bone", x: 40, y: 158, w: 16, h: 58, double: true }, elements: [["right_arm", "radius"], ["right_arm", "ulna"]] },
+  { shape: { type: "path", d: "M36 218 q-3 13 3 22 q9 7 15 -1 q4 -11 0 -21 q-3 6 -9 6 q-6 0 -9 -6 Z" }, elements: [["right_arm", "metacarpals"], ["right_arm", "phalanges_prox"]] },
+  { shape: { type: "bone", x: 140, y: 90, w: 14, h: 66 }, elements: [["left_arm", "humerus"]] },
+  { shape: { type: "bone", x: 144, y: 158, w: 16, h: 58, double: true }, elements: [["left_arm", "radius"], ["left_arm", "ulna"]] },
+  { shape: { type: "path", d: "M149 218 q-3 13 3 22 q9 7 15 -1 q4 -11 0 -21 q-3 6 -9 6 q-6 0 -9 -6 Z" }, elements: [["left_arm", "metacarpals"], ["left_arm", "phalanges_prox"]] },
+  { shape: { type: "bone", x: 79, y: 216, w: 15, h: 88 }, elements: [["right_leg", "femur"]] },
+  { shape: { type: "bone", x: 79, y: 306, w: 16, h: 78, double: true }, elements: [["right_leg", "tibia"], ["right_leg", "fibula"]] },
+  { shape: { type: "path", d: "M72 386 q-5 9 3 14 q15 5 24 -2 q3 -7 -4 -12 Z" }, elements: [["right_leg", "calcaneus"], ["right_leg", "talus"], ["right_leg", "metatarsals"]] },
+  { shape: { type: "bone", x: 106, y: 216, w: 15, h: 88 }, elements: [["left_leg", "femur"]] },
+  { shape: { type: "bone", x: 105, y: 306, w: 16, h: 78, double: true }, elements: [["left_leg", "tibia"], ["left_leg", "fibula"]] },
+  { shape: { type: "path", d: "M104 386 q-3 9 4 14 q15 4 24 -3 q3 -6 -4 -11 Z" }, elements: [["left_leg", "calcaneus"], ["left_leg", "talus"], ["left_leg", "metatarsals"]] },
 ];
 
 // Osteometry groups (label + flat keys) mirroring the frontend OSTEOMETRY_FIELDS.

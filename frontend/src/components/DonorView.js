@@ -273,9 +273,40 @@ const DonorView = () => {
     <span className={val ? "fw-semibold" : "text-muted"}>{codeDisplay(val)}</span>
   );
 
+  // Read-only render of the Instruments/Equipment Used + Exemplars Used pair
+  // that follows the Trauma, General Observations and Continuation boxes.
+  const instrExemplarsView = (base) => {
+    const instr = notes[`${base}_instruments`];
+    const exemp = notes[`${base}_exemplars`];
+    if (!instr && !exemp) return null;
+    return (
+      <div className="mt-2 small">
+        {instr && <div><span className="fw-semibold">Instruments/Equipment Used (Type and ID#): </span><span style={{ whiteSpace: "pre-wrap" }}>{instr}</span></div>}
+        {exemp && <div><span className="fw-semibold">Exemplars Used: </span><span style={{ whiteSpace: "pre-wrap" }}>{exemp}</span></div>}
+      </div>
+    );
+  };
+
   // ---- Williams Analysis form ----------------------------------------------
   const williamsView = (
     <>
+      {/* Analysis (Williams form header) — front of the Williams packet */}
+      {hasAnalysis && (
+        <div className="mb-3">
+          <h5>Analysis</h5>
+          <Table size="sm" bordered>
+            <tbody>
+              {ANALYSIS_FIELDS.filter(f => analysis[f.key]).map(f => (
+                <tr key={f.key}>
+                  <td className="fw-semibold" style={{ width: "30%" }}>{f.label}</td>
+                  <td style={{ whiteSpace: "pre-wrap" }}>{analysis[f.key]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      )}
+
       {/* Element Inventory (Present/Absent) + Skeletal Inventory Homunculus */}
       {hasInventory && (
         <div className="mb-4">
@@ -324,28 +355,11 @@ const DonorView = () => {
               {/* Skeletal Inventory Homunculus sits at the bottom of the section (per the form) */}
               <Card className="mb-2">
                 <Card.Body className="text-center">
-                  <img src={skeletalHomunculusImg} alt="Skeletal Inventory Homunculus" style={{ maxWidth: "100%", height: "auto", maxHeight: 560 }} />
+                  <img src={skeletalHomunculusImg} alt="Skeletal Inventory Homunculus" style={{ width: "100%", maxWidth: 700, height: "auto" }} />
                 </Card.Body>
               </Card>
             </div>
           </Collapse>
-        </div>
-      )}
-
-      {/* Analysis (Williams form header) */}
-      {hasAnalysis && (
-        <div className="mb-3">
-          <h5>Analysis</h5>
-          <Table size="sm" bordered>
-            <tbody>
-              {ANALYSIS_FIELDS.filter(f => analysis[f.key]).map(f => (
-                <tr key={f.key}>
-                  <td className="fw-semibold" style={{ width: "30%" }}>{f.label}</td>
-                  <td style={{ whiteSpace: "pre-wrap" }}>{analysis[f.key]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
         </div>
       )}
 
@@ -407,27 +421,44 @@ const DonorView = () => {
       })}
 
       {/* Trauma and Pathological Analysis */}
-      {notes.trauma_and_pathological_analysis && (
+      {(notes.trauma_and_pathological_analysis || notes.trauma_instruments || notes.trauma_exemplars) && (
         <Card className="mb-2 mt-3">
           <Card.Header className="py-2 fw-semibold">Trauma and Pathological Analysis</Card.Header>
-          <Card.Body className="py-2" style={{ whiteSpace: "pre-wrap" }}>{notes.trauma_and_pathological_analysis}</Card.Body>
+          <Card.Body className="py-2">
+            {notes.trauma_and_pathological_analysis && <div style={{ whiteSpace: "pre-wrap" }}>{notes.trauma_and_pathological_analysis}</div>}
+            {instrExemplarsView("trauma")}
+          </Card.Body>
         </Card>
       )}
 
       {/* General Observations (second box) */}
-      {notes.general_observations_2 && (
+      {(notes.general_observations_2 || notes.general_observations_2_instruments || notes.general_observations_2_exemplars) && (
         <Card className="mb-2">
           <Card.Header className="py-2 fw-semibold">General Observations</Card.Header>
-          <Card.Body className="py-2" style={{ whiteSpace: "pre-wrap" }}>{notes.general_observations_2}</Card.Body>
+          <Card.Body className="py-2">
+            {notes.general_observations_2 && <div style={{ whiteSpace: "pre-wrap" }}>{notes.general_observations_2}</div>}
+            {instrExemplarsView("general_observations_2")}
+          </Card.Body>
         </Card>
       )}
 
       {/* Trauma and General Observations Homunculus */}
       <Card className="mb-2 mt-3">
         <Card.Body className="text-center">
-          <img src={traumaHomunculusImg} alt="Trauma and General Observations Homunculus" style={{ maxWidth: "100%", height: "auto", maxHeight: 560 }} />
+          <img src={traumaHomunculusImg} alt="Trauma and General Observations Homunculus" style={{ width: "100%", maxWidth: 700, height: "auto" }} />
         </Card.Body>
       </Card>
+
+      {/* Continuation to Skeletal Analysis */}
+      {(notes.continuation || notes.continuation_instruments || notes.continuation_exemplars) && (
+        <Card className="mb-2">
+          <Card.Header className="py-2 fw-semibold">Continuation to Skeletal Analysis</Card.Header>
+          <Card.Body className="py-2">
+            {notes.continuation && <div style={{ whiteSpace: "pre-wrap" }}>{notes.continuation}</div>}
+            {instrExemplarsView("continuation")}
+          </Card.Body>
+        </Card>
+      )}
     </>
   );
 

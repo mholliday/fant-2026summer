@@ -218,6 +218,13 @@ const defaultDonorData = () => ({
     general_observations: "",
     trauma_and_pathological_analysis: "",
     general_observations_2: "",
+    trauma_instruments: "",
+    trauma_exemplars: "",
+    general_observations_2_instruments: "",
+    general_observations_2_exemplars: "",
+    continuation: "",
+    continuation_instruments: "",
+    continuation_exemplars: "",
   },
   analysis: defaultAnalysis(),
   element_inventory: defaultElementInventory(),
@@ -336,9 +343,55 @@ const ModifyDonor = ({ create = false }) => {
     </Form.Select>
   );
 
+  // Instruments/Equipment Used + Exemplars Used pair that the Williams form
+  // repeats under the Trauma, General Observations and Continuation boxes.
+  // Returned as inline JSX (not a component) so inputs keep focus while typing.
+  const instrExemplars = (base) => (
+    <div className="row g-3 mt-1">
+      <div className="col-md-6">
+        <Form.Group>
+          <Form.Label className="small mb-1">Instruments/Equipment Used (Type and ID#)</Form.Label>
+          <Form.Control as="textarea" rows={2} value={notes[`${base}_instruments`] ?? ""} onChange={(e) => handleNotesChange(`${base}_instruments`, e.target.value)} />
+        </Form.Group>
+      </div>
+      <div className="col-md-6">
+        <Form.Group>
+          <Form.Label className="small mb-1">Exemplars Used</Form.Label>
+          <Form.Control as="textarea" rows={2} value={notes[`${base}_exemplars`] ?? ""} onChange={(e) => handleNotesChange(`${base}_exemplars`, e.target.value)} />
+        </Form.Group>
+      </div>
+    </div>
+  );
+
   // ---- Williams Analysis form (John A. Williams Collection) ----------------
   const williamsTab = (
     <>
+      {/* Analysis Header (Williams form) — front of the Williams packet */}
+      <Card className="mb-3">
+        <Card.Header onClick={() => toggle("analysis")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center">
+          <span><strong>Analysis</strong><span className="text-muted fw-normal ms-2 small">Williams Collection lab form header</span></span>
+          <span className="text-muted">{open.analysis ? "▲" : "▼"}</span>
+        </Card.Header>
+        <Collapse in={open.analysis}><div>
+        <Card.Body>
+          <div className="row g-3">
+            {ANALYSIS_FIELDS.map((f) => (
+              <div key={f.key} className={f.type === "textarea" ? "col-12" : "col-md-4"}>
+                <Form.Group>
+                  <Form.Label className="small mb-1">{f.label}</Form.Label>
+                  {f.type === "textarea" ? (
+                    <Form.Control as="textarea" rows={2} value={analysis[f.key] ?? ""} onChange={(e) => handleAnalysisChange(f.key, e.target.value)} />
+                  ) : (
+                    <Form.Control size="sm" type={f.type === "date" ? "date" : "text"} value={analysis[f.key] ?? ""} onChange={(e) => handleAnalysisChange(f.key, e.target.value)} />
+                  )}
+                </Form.Group>
+              </div>
+            ))}
+          </div>
+        </Card.Body>
+        </div></Collapse>
+      </Card>
+
       {/* Element Inventory (Present/Absent/Observations) + Skeletal Inventory Homunculus */}
       <Card className="mb-3">
         <Card.Header onClick={() => toggle("element_inventory")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center">
@@ -389,33 +442,7 @@ const ModifyDonor = ({ create = false }) => {
           ))}
           {/* Skeletal Inventory Homunculus sits at the bottom of the section (per the form) */}
           <div className="text-center mt-3">
-            <img src={skeletalHomunculusImg} alt="Skeletal Inventory Homunculus" style={{ maxWidth: "100%", height: "auto", maxHeight: 560 }} />
-          </div>
-        </Card.Body>
-        </div></Collapse>
-      </Card>
-
-      {/* Analysis Header (Williams form) */}
-      <Card className="mb-3">
-        <Card.Header onClick={() => toggle("analysis")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center">
-          <span><strong>Analysis</strong><span className="text-muted fw-normal ms-2 small">Williams Collection lab form header</span></span>
-          <span className="text-muted">{open.analysis ? "▲" : "▼"}</span>
-        </Card.Header>
-        <Collapse in={open.analysis}><div>
-        <Card.Body>
-          <div className="row g-3">
-            {ANALYSIS_FIELDS.map((f) => (
-              <div key={f.key} className={f.type === "textarea" ? "col-12" : "col-md-4"}>
-                <Form.Group>
-                  <Form.Label className="small mb-1">{f.label}</Form.Label>
-                  {f.type === "textarea" ? (
-                    <Form.Control as="textarea" rows={2} value={analysis[f.key] ?? ""} onChange={(e) => handleAnalysisChange(f.key, e.target.value)} />
-                  ) : (
-                    <Form.Control size="sm" type={f.type === "date" ? "date" : "text"} value={analysis[f.key] ?? ""} onChange={(e) => handleAnalysisChange(f.key, e.target.value)} />
-                  )}
-                </Form.Group>
-              </div>
-            ))}
+            <img src={skeletalHomunculusImg} alt="Skeletal Inventory Homunculus" style={{ width: "100%", maxWidth: 700, height: "auto" }} />
           </div>
         </Card.Body>
         </div></Collapse>
@@ -479,6 +506,7 @@ const ModifyDonor = ({ create = false }) => {
             <div className="text-muted small mb-1">Provide references where necessary/appropriate.</div>
             <Form.Control as="textarea" rows={5} value={notes.trauma_and_pathological_analysis} onChange={(e) => handleNotesChange("trauma_and_pathological_analysis", e.target.value)} />
           </Form.Group>
+          {instrExemplars("trauma")}
         </Card.Body>
       </Card>
 
@@ -490,13 +518,25 @@ const ModifyDonor = ({ create = false }) => {
             <div className="text-muted small mb-1">Provide references where necessary/appropriate.</div>
             <Form.Control as="textarea" rows={5} value={notes.general_observations_2} onChange={(e) => handleNotesChange("general_observations_2", e.target.value)} />
           </Form.Group>
+          {instrExemplars("general_observations_2")}
         </Card.Body>
       </Card>
 
       {/* Trauma and General Observations Homunculus */}
       <Card className="mb-3">
         <Card.Body className="text-center">
-          <img src={traumaHomunculusImg} alt="Trauma and General Observations Homunculus" style={{ maxWidth: "100%", height: "auto", maxHeight: 560 }} />
+          <img src={traumaHomunculusImg} alt="Trauma and General Observations Homunculus" style={{ width: "100%", maxWidth: 700, height: "auto" }} />
+        </Card.Body>
+      </Card>
+
+      {/* Continuation to Skeletal Analysis */}
+      <Card className="mb-3">
+        <Card.Body>
+          <Form.Group>
+            <Form.Label className="fw-semibold">Continuation to Skeletal Analysis</Form.Label>
+            <Form.Control as="textarea" rows={5} value={notes.continuation ?? ""} onChange={(e) => handleNotesChange("continuation", e.target.value)} />
+          </Form.Group>
+          {instrExemplars("continuation")}
         </Card.Body>
       </Card>
     </>

@@ -111,7 +111,7 @@ const absentBoneIds = (inventory = {}) => {
 const OSTEOMETRY_FIELDS = {
   Cranium: [
     ["maximum_cranial_length", "Max. Cranial Length (GOL)"], ["maximum_cranial_breadth", "Max. Cranial Breadth (XCB)"],
-    ["bizygomatic_breadth", "Bizygomatic Breadth (ZYB)"], ["basion_bregma_height", "Basion-Bregma Height (BBH)"],
+    ["bizygomatic_breadth", "Bizygomatic Diameter (ZYB)"], ["basion_bregma_height", "Basion-Bregma Height (BBH)"],
     ["cranial_base_length", "Cranial Base Length (BNL)"], ["basion_prosthion_length", "Basion-Prosthion Length (BPL)"],
     ["maxilloalveolar_breadth", "Maxillo-Alveolar Breadth (MAB)"], ["maxilloalveolar_length", "Maxillo-Alveolar Length (MAL)"],
     ["biauricular_breadth", "Biauricular Breadth (AUB)"], ["upper_facial_height", "Upper Facial Height (UFHT)"],
@@ -125,13 +125,13 @@ const OSTEOMETRY_FIELDS = {
   ],
   Mandible: [
     ["chin_height", "Chin Height (GNI)"], ["mandibular_body_height", "Mandibular Body Height (HMF)"],
-    ["mandibular_body_breadth", "Mandibular Body Breadth (TMF)"], ["bigonial_breadth", "Bigonial Breadth (GOG)"],
+    ["mandibular_body_breadth", "Mandibular Body Breadth (TMF)"], ["bigonial_breadth", "Bigonial Width (GOG)"],
     ["bicondylar_breadth", "Bicondylar Breadth (CDB)"], ["min_ramus_breadth", "Min. Ramus Breadth (WRB)"],
     ["max_ramus_breadth", "Max. Ramus Breadth (XRB)"],
     ["mandible_length", "Mandible Length"], ["symphysis_height", "Symphysis Height"], ["ramus_height", "Ramus Height"],
   ],
   Clavicle: [
-    ["clavicle_max_length", "Maximum Length (XLN)"], ["clavicle_ap_diameter", "A-P Diameter Midshaft (APD)"],
+    ["clavicle_max_length", "Maximum Length (XLN)"], ["clavicle_ap_diameter", "Ant.-Post. Diameter Midshaft (APD)"],
     ["clavicle_si_diameter", "S-I Diameter Midshaft (VRD)"],
   ],
   Scapula: [
@@ -140,12 +140,12 @@ const OSTEOMETRY_FIELDS = {
   ],
   Humerus: [
     ["humerus_max_length", "Maximum Length (XLN)"], ["humerus_epicondylar_width", "Epicondylar Breadth (EBR)"],
-    ["humerus_head_diameter", "Head Diameter (HDD)"], ["humerus_max_diam_midshaft", "Max. Diam. Midshaft (MXD)"],
+    ["humerus_head_diameter", "Vertical Diameter of Head (HDD)"], ["humerus_max_diam_midshaft", "Max. Diam. Midshaft (MXD)"],
     ["humerus_min_diam_midshaft", "Min. Diam. Midshaft (MWD)"],
   ],
   Radius: [
-    ["radius_max_length", "Maximum Length (XLN)"], ["radius_sagittal_diameter", "A-P Diameter Midshaft (APD)"],
-    ["radius_transverse_diameter", "M-L Diameter Midshaft (TVD)"],
+    ["radius_max_length", "Maximum Length (XLN)"], ["radius_sagittal_diameter", "Ant.-Post. Diameter Midshaft (APD)"],
+    ["radius_transverse_diameter", "Med.-Lat. Diameter Midshaft (TVD)"],
   ],
   Ulna: [
     ["ulna_max_length", "Maximum Length (XLN)"], ["ulna_dorso_volar_diam", "Dorso-Volar Diameter (DVD)"],
@@ -155,21 +155,21 @@ const OSTEOMETRY_FIELDS = {
     ["sacrum_ant_height", "Anterior Height (AHT)"], ["sacrum_ant_sup_breadth", "Ant.-Sup. Breadth (ABR)"],
     ["sacrum_s1_breadth", "Max. Trans. Diam. Base S1 (S1B)"],
   ],
-  "Os Coxa": [
+  "Innominate (Pelvis)": [
     ["os_coxa_height", "Innominate Height (OHT)"], ["iliac_breadth", "Iliac Breadth (ABR)"],
     ["pubis_length", "Pubis Length"], ["ischium_length", "Ischium Length"],
   ],
   Femur: [
     ["femur_max_length", "Maximum Length (XLN)"], ["femur_bicondylar_length", "Bicondylar Length (BLN)"],
-    ["femur_epicondylar_breadth", "Epicondylar Breadth (EBR)"], ["femur_head_diameter", "Head Diameter (HDD)"],
-    ["femur_ap_subtrochanteric", "A-P Subtrochanteric (SAP)"], ["femur_ml_subtrochanteric", "M-L Subtrochanteric (STV)"],
-    ["femur_ap_midshaft", "A-P Midshaft (MAP)"], ["femur_ml_midshaft", "M-L Midshaft (MTV)"],
+    ["femur_epicondylar_breadth", "Epicondylar Breadth (EBR)"], ["femur_head_diameter", "Maximum Diameter of Femoral Head (HDD)"],
+    ["femur_ap_subtrochanteric", "Ant.-Post. Subtrochanteric (SAP)"], ["femur_ml_subtrochanteric", "Med.-Lat. Subtrochanteric (STV)"],
+    ["femur_ap_midshaft", "Ant.-Post. Midshaft (MAP)"], ["femur_ml_midshaft", "Med.-Lat. Midshaft (MTV)"],
     ["femur_midshaft_circ", "Midshaft Circumference"], ["femur_bicondylar_width", "Distal Bicondylar Width"],
   ],
   Tibia: [
     ["tibia_max_length", "Maximum Length (XLN)"], ["tibia_prox_epiphyseal", "Max. Prox. Epiph. Breadth (PEB)"],
-    ["tibia_dist_epiphyseal", "Max. Dist. Epiph. Breadth (DEB)"], ["tibia_ap_nutrient_foramen", "A-P at Nutrient For. (NFX)"],
-    ["tibia_ml_nutrient_foramen", "M-L at Nutrient For. (NFT)"], ["tibia_midshaft_circ", "Midshaft Circumference"],
+    ["tibia_dist_epiphyseal", "Max. Dist. Epiph. Breadth (DEB)"], ["tibia_ap_nutrient_foramen", "Ant.-Post. at Nutrient For. (NFX)"],
+    ["tibia_ml_nutrient_foramen", "Med.-Lat. at Nutrient For. (NFT)"], ["tibia_midshaft_circ", "Midshaft Circumference"],
     ["tibia_distal_breadth", "Distal Breadth"],
   ],
   Fibula: [

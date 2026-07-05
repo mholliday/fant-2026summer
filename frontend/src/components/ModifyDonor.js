@@ -761,9 +761,10 @@ const ModifyDonor = ({ create = false }) => {
           <div className="row g-3 mb-3">
             <div className="col-md-6">
               <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Carpal (Wrist) Bones</h6>
-              <div className="row g-1">
+              {/* CSS columns so bones read top-to-bottom (Scaphoid→Pisiform | Hamate→Trapezium) per the form */}
+              <div style={{ columnCount: 2, columnGap: "0.75rem" }}>
                 {CARPAL_BONES.map(k => (
-                  <div key={k} className="col-6">
+                  <div key={k} className="mb-2" style={{ breakInside: "avoid" }}>
                     <Form.Label className="small mb-0">{CARPAL_LABELS[k]}</Form.Label>
                     <div className="d-flex gap-1">
                       <div className="flex-fill">
@@ -781,9 +782,10 @@ const ModifyDonor = ({ create = false }) => {
             </div>
             <div className="col-md-6">
               <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Tarsal (Foot) Bones</h6>
-              <div className="row g-1">
+              {/* CSS columns so bones read top-to-bottom (Calcaneus→Cuboid | Cuneiform I→Patella) per the form */}
+              <div style={{ columnCount: 2, columnGap: "0.75rem" }}>
                 {TARSAL_BONES.map(k => (
-                  <div key={k} className="col-6">
+                  <div key={k} className="mb-2" style={{ breakInside: "avoid" }}>
                     <Form.Label className="small mb-0">{TARSAL_LABELS[k]}</Form.Label>
                     <div className="d-flex gap-1">
                       <div className="flex-fill">

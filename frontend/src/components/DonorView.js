@@ -642,9 +642,10 @@ const DonorView = () => {
                 <Card>
                   <Card.Header className="py-2 fw-semibold small">{title}</Card.Header>
                   <Card.Body className="py-2">
-                    <div className="row g-1">
+                    {/* CSS columns so bones read top-to-bottom (per the SKELETAL form) */}
+                    <div style={{ columnCount: 2, columnGap: "0.75rem" }}>
                       {bones.map(k => (
-                        <div key={k} className="col-6 small">
+                        <div key={k} className="small mb-1" style={{ breakInside: "avoid" }}>
                           <span className="text-muted">{labels[k]}: </span>
                           L:<BoneCell val={skeleton[`${k}_l`]} /> / R:<BoneCell val={skeleton[`${k}_r`]} />
                         </div>

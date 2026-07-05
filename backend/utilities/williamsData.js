@@ -167,9 +167,9 @@ const OSTEOMETRY_FIELDS = {
     ["femur_midshaft_circ", "Midshaft Circumference"], ["femur_bicondylar_width", "Distal Bicondylar Width"],
   ],
   Tibia: [
-    ["tibia_max_length", "Maximum Length (XLN)"], ["tibia_prox_epiphyseal", "Max. Prox. Epiph. Breadth (PEB)"],
-    ["tibia_dist_epiphyseal", "Max. Dist. Epiph. Breadth (DEB)"], ["tibia_ap_nutrient_foramen", "Ant.-Post. at Nutrient For. (NFX)"],
-    ["tibia_ml_nutrient_foramen", "Med.-Lat. at Nutrient For. (NFT)"], ["tibia_midshaft_circ", "Midshaft Circumference"],
+    ["tibia_max_length", "Maximum Condylo-Malleolar Length* (XLN)"], ["tibia_prox_epiphyseal", "Maximum Prox. Epiphyseal Breadth (PEB)"],
+    ["tibia_dist_epiphyseal", "Maximum Dist. Epiphyseal Breadth (DEB)"], ["tibia_ap_nutrient_foramen", "Maximum Diameter at Nutrient Foramen (NFX)"],
+    ["tibia_ml_nutrient_foramen", "Max. Med.-Lat. Diameter at Nutrient Foramen (NFT)"], ["tibia_midshaft_circ", "Midshaft Circumference"],
     ["tibia_distal_breadth", "Distal Breadth"],
   ],
   Fibula: [

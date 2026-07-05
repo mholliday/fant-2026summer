@@ -108,11 +108,11 @@ const OSTEOMETRY_FIELDS = {
     { key: "femur_bicondylar_width",     label: "Distal Bicondylar Width",              unit: "mm" },
   ],
   tibia: [
-    { key: "tibia_max_length",           label: "Maximum Length (XLN)",                 unit: "mm" },
-    { key: "tibia_prox_epiphyseal",      label: "Max. Prox. Epiphyseal Breadth (PEB)",  unit: "mm" },
-    { key: "tibia_dist_epiphyseal",      label: "Max. Dist. Epiphyseal Breadth (DEB)",  unit: "mm" },
-    { key: "tibia_ap_nutrient_foramen",  label: "Ant.-Post. Diameter at Nutrient Foramen (NFX)",unit: "mm" },
-    { key: "tibia_ml_nutrient_foramen",  label: "Med.-Lat. Diameter at Nutrient Foramen (NFT)",unit: "mm" },
+    { key: "tibia_max_length",           label: "Maximum Condylo-Malleolar Length* (XLN)",                 unit: "mm" },
+    { key: "tibia_prox_epiphyseal",      label: "Maximum Prox. Epiphyseal Breadth (PEB)",  unit: "mm" },
+    { key: "tibia_dist_epiphyseal",      label: "Maximum Dist. Epiphyseal Breadth (DEB)",  unit: "mm" },
+    { key: "tibia_ap_nutrient_foramen",  label: "Maximum Diameter at Nutrient Foramen (NFX)",unit: "mm" },
+    { key: "tibia_ml_nutrient_foramen",  label: "Max. Med.-Lat. Diameter at Nutrient Foramen (NFT)",unit: "mm" },
     { key: "tibia_midshaft_circ",        label: "Midshaft Circumference",               unit: "mm" },
     { key: "tibia_distal_breadth",       label: "Distal Breadth",                       unit: "mm" },
   ],
@@ -247,6 +247,9 @@ const ModifyDonor = ({ create = false }) => {
   // Each Element Inventory subsection (Cranium, Axial, …) is individually collapsible.
   const [elemOpen, setElemOpen] = useState({});
   const toggleElem = (key) => setElemOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+  // Each Osteometry subsection (Cranium, Mandible, …) is individually collapsible.
+  const [osteoOpen, setOsteoOpen] = useState({});
+  const toggleOsteo = (key) => setOsteoOpen((prev) => ({ ...prev, [key]: !prev[key] }));
 
   useEffect(() => {
     if (create) {
@@ -468,10 +471,16 @@ const ModifyDonor = ({ create = false }) => {
         <Collapse in={open.osteometry}><div>
         <Card.Body>
           {Object.entries(OSTEOMETRY_FIELDS).map(([group, fields]) => (
-            <div key={group} className="mb-4">
-              <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">
-                {BONE_GROUP_LABELS[group]}
+            <div key={group} className="mb-3">
+              <h6
+                onClick={() => toggleOsteo(group)}
+                style={{ cursor: "pointer", userSelect: "none" }}
+                className="text-uppercase text-muted border-bottom pb-1 mb-2 d-flex justify-content-between align-items-center"
+              >
+                <span>{BONE_GROUP_LABELS[group]}</span>
+                <span>{osteoOpen[group] ? "▲" : "▼"}</span>
               </h6>
+              <Collapse in={!!osteoOpen[group]}><div>
               <div className="row g-2">
                 {fields.map(({ key, label, unit }) => (
                   <div key={key} className="col-md-4">
@@ -492,6 +501,7 @@ const ModifyDonor = ({ create = false }) => {
                   </div>
                 ))}
               </div>
+              </div></Collapse>
             </div>
           ))}
         </Card.Body>

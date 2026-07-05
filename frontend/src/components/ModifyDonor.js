@@ -234,6 +234,8 @@ const ModifyDonor = ({ create = false }) => {
   const [error, setError] = useState("");
   const [open, setOpen] = useState({ donorID: true, identification: true, analysis: false, element_inventory: false, skeleton: false, dentition: false, osteometry: false, notes: false });
   const toggle = (s) => setOpen(prev => ({ ...prev, [s]: !prev[s] }));
+  // Both tabs start closed; clicking a tab opens it, clicking the open tab closes it.
+  const [activeTab, setActiveTab] = useState(null);
 
   useEffect(() => {
     if (create) {
@@ -341,45 +343,40 @@ const ModifyDonor = ({ create = false }) => {
         </Card.Header>
         <Collapse in={open.element_inventory}><div>
         <Card.Body>
-          <div className="row">
-            <div className="col-lg-9">
-              {ELEMENT_GROUPS.map((group) => (
-                <div key={group.key} className="mb-3">
-                  <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">{group.label}</h6>
-                  <Table size="sm" bordered className="mb-0">
-                    <thead>
-                      <tr>
-                        <th style={{ width: "30%" }}>Element</th>
-                        <th className="text-center" style={{ width: 80 }}>Absent</th>
-                        <th>Other Observations</th>
+          {ELEMENT_GROUPS.map((group) => (
+            <div key={group.key} className="mb-3">
+              <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">{group.label}</h6>
+              <Table size="sm" bordered className="mb-0">
+                <thead>
+                  <tr>
+                    <th style={{ width: "30%" }}>Element</th>
+                    <th className="text-center" style={{ width: 80 }}>Absent</th>
+                    <th>Other Observations</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {group.elements.map((el) => {
+                    const k = elemKey(group.key, el.key);
+                    const cell = inventory[k] ?? { absent: false, obs: "" };
+                    return (
+                      <tr key={k}>
+                        <td className="small fw-semibold">{el.label}</td>
+                        <td className="text-center">
+                          <Form.Check type="checkbox" checked={!!cell.absent} onChange={(e) => handleInventoryChange(k, { absent: e.target.checked })} />
+                        </td>
+                        <td>
+                          <Form.Control size="sm" value={cell.obs ?? ""} onChange={(e) => handleInventoryChange(k, { obs: e.target.value })} />
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {group.elements.map((el) => {
-                        const k = elemKey(group.key, el.key);
-                        const cell = inventory[k] ?? { absent: false, obs: "" };
-                        return (
-                          <tr key={k}>
-                            <td className="small fw-semibold">{el.label}</td>
-                            <td className="text-center">
-                              <Form.Check type="checkbox" checked={!!cell.absent} onChange={(e) => handleInventoryChange(k, { absent: e.target.checked })} />
-                            </td>
-                            <td>
-                              <Form.Control size="sm" value={cell.obs ?? ""} onChange={(e) => handleInventoryChange(k, { obs: e.target.value })} />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-                </div>
-              ))}
+                    );
+                  })}
+                </tbody>
+              </Table>
             </div>
-            <div className="col-lg-3">
-              <div className="position-sticky" style={{ top: 16 }}>
-                <Homunculus inventory={inventory} title="Skeletal Inventory Homunculus" />
-              </div>
-            </div>
+          ))}
+          {/* Skeletal Inventory Homunculus sits at the bottom of the section (per the form) */}
+          <div className="mt-3">
+            <Homunculus inventory={inventory} title="Skeletal Inventory Homunculus" />
           </div>
         </Card.Body>
         </div></Collapse>
@@ -912,7 +909,11 @@ const ModifyDonor = ({ create = false }) => {
           </div></Collapse>
         </Card>
 
-        <Tabs defaultActiveKey="williams" className="mb-3" mountOnEnter={false}>
+        <Tabs
+          activeKey={activeTab}
+          onSelect={(k) => setActiveTab((prev) => (prev === k ? null : k))}
+          className="mb-3"
+        >
           <Tab eventKey="williams" title="Williams Analysis">
             {williamsTab}
           </Tab>

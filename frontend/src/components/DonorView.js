@@ -164,6 +164,8 @@ const DonorView = () => {
   const [error, setError] = useState("");
   const [actionMsg, setActionMsg] = useState("");
   const [openGroups, setOpenGroups] = useState({});
+  // Both tabs start closed; clicking a tab opens it, clicking the open tab closes it.
+  const [activeTab, setActiveTab] = useState(null);
   const { canWrite, isAdmin } = useAuth();
   const { api } = useAPI();
   const navigate = useNavigate();
@@ -281,40 +283,33 @@ const DonorView = () => {
           </Card>
           <Collapse in={!!openGroups["_inventory"]}>
             <div>
-              <div className="row">
-                <div className="col-lg-9">
-                  {ELEMENT_GROUPS.map(group => (
-                    <Card key={group.key} className="mb-2">
-                      <Card.Header className="py-2 fw-semibold small">{group.label}</Card.Header>
-                      <Card.Body className="p-0">
-                        <Table size="sm" className="mb-0">
-                          <tbody>
-                            {group.elements.map(el => {
-                              const cell = inventory[elemKey(group.key, el.key)] ?? { absent: false, obs: "" };
-                              return (
-                                <tr key={el.key}>
-                                  <td className="small fw-semibold" style={{ width: "30%" }}>{el.label}</td>
-                                  <td style={{ width: 90 }}>
-                                    <Badge bg={cell.absent ? "secondary" : "success"}>{cell.absent ? "Absent" : "Present"}</Badge>
-                                  </td>
-                                  <td className="small text-muted">{cell.obs || ""}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </Table>
-                      </Card.Body>
-                    </Card>
-                  ))}
-                </div>
-                <div className="col-lg-3">
-                  <div className="position-sticky" style={{ top: 16 }}>
-                    <Card>
-                      <Card.Body><Homunculus inventory={inventory} title="Skeletal Inventory Homunculus" /></Card.Body>
-                    </Card>
-                  </div>
-                </div>
-              </div>
+              {ELEMENT_GROUPS.map(group => (
+                <Card key={group.key} className="mb-2">
+                  <Card.Header className="py-2 fw-semibold small">{group.label}</Card.Header>
+                  <Card.Body className="p-0">
+                    <Table size="sm" className="mb-0">
+                      <tbody>
+                        {group.elements.map(el => {
+                          const cell = inventory[elemKey(group.key, el.key)] ?? { absent: false, obs: "" };
+                          return (
+                            <tr key={el.key}>
+                              <td className="small fw-semibold" style={{ width: "30%" }}>{el.label}</td>
+                              <td style={{ width: 90 }}>
+                                <Badge bg={cell.absent ? "secondary" : "success"}>{cell.absent ? "Absent" : "Present"}</Badge>
+                              </td>
+                              <td className="small text-muted">{cell.obs || ""}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
+                  </Card.Body>
+                </Card>
+              ))}
+              {/* Skeletal Inventory Homunculus sits at the bottom of the section (per the form) */}
+              <Card className="mb-2">
+                <Card.Body><Homunculus inventory={inventory} title="Skeletal Inventory Homunculus" /></Card.Body>
+              </Card>
             </div>
           </Collapse>
         </div>
@@ -785,7 +780,11 @@ const DonorView = () => {
         </Stack>
       </div>
 
-      <Tabs defaultActiveKey="williams" className="mb-3">
+      <Tabs
+        activeKey={activeTab}
+        onSelect={(k) => setActiveTab((prev) => (prev === k ? null : k))}
+        className="mb-3"
+      >
         <Tab eventKey="williams" title="Williams Analysis">
           {williamsView}
         </Tab>

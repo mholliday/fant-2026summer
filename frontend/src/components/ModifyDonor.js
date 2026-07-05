@@ -10,7 +10,8 @@ import {
   defaultElementInventory,
   defaultAnalysis,
 } from "../services/williamsForm";
-import Homunculus from "./Homunculus";
+import skeletalHomunculusImg from "../assets/skeletal_inventory_homunculus.png";
+import traumaHomunculusImg from "../assets/trauma_homunculus.png";
 
 // Osteometry measurement order follows the Williams form's numbered list
 // (items 1–81). Measurements not on the form are kept but appended at the end
@@ -236,6 +237,9 @@ const ModifyDonor = ({ create = false }) => {
   const toggle = (s) => setOpen(prev => ({ ...prev, [s]: !prev[s] }));
   // Both tabs start closed; clicking a tab opens it, clicking the open tab closes it.
   const [activeTab, setActiveTab] = useState(null);
+  // Each Element Inventory subsection (Cranium, Axial, …) is individually collapsible.
+  const [elemOpen, setElemOpen] = useState({});
+  const toggleElem = (key) => setElemOpen((prev) => ({ ...prev, [key]: !prev[key] }));
 
   useEffect(() => {
     if (create) {
@@ -345,7 +349,15 @@ const ModifyDonor = ({ create = false }) => {
         <Card.Body>
           {ELEMENT_GROUPS.map((group) => (
             <div key={group.key} className="mb-3">
-              <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">{group.label}</h6>
+              <h6
+                onClick={() => toggleElem(group.key)}
+                style={{ cursor: "pointer", userSelect: "none" }}
+                className="text-uppercase text-muted border-bottom pb-1 mb-2 d-flex justify-content-between align-items-center"
+              >
+                <span>{group.label}</span>
+                <span>{elemOpen[group.key] ? "▲" : "▼"}</span>
+              </h6>
+              <Collapse in={!!elemOpen[group.key]}><div>
               <Table size="sm" bordered className="mb-0">
                 <thead>
                   <tr>
@@ -372,11 +384,12 @@ const ModifyDonor = ({ create = false }) => {
                   })}
                 </tbody>
               </Table>
+              </div></Collapse>
             </div>
           ))}
           {/* Skeletal Inventory Homunculus sits at the bottom of the section (per the form) */}
-          <div className="mt-3">
-            <Homunculus inventory={inventory} title="Skeletal Inventory Homunculus" />
+          <div className="text-center mt-3">
+            <img src={skeletalHomunculusImg} alt="Skeletal Inventory Homunculus" style={{ maxWidth: "100%", height: "auto", maxHeight: 560 }} />
           </div>
         </Card.Body>
         </div></Collapse>
@@ -482,8 +495,8 @@ const ModifyDonor = ({ create = false }) => {
 
       {/* Trauma and General Observations Homunculus */}
       <Card className="mb-3">
-        <Card.Body>
-          <Homunculus inventory={inventory} title="Trauma and General Observations Homunculus" />
+        <Card.Body className="text-center">
+          <img src={traumaHomunculusImg} alt="Trauma and General Observations Homunculus" style={{ maxWidth: "100%", height: "auto", maxHeight: 560 }} />
         </Card.Body>
       </Card>
     </>

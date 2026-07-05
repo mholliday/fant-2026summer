@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button, Stack, Spinner, Alert, Badge, Card, Table, Collapse, Tabs, Tab } from "react-bootstrap";
 import { useAuth, useAPI } from "../contexts/AppContext";
 import { ANALYSIS_FIELDS, ELEMENT_GROUPS, elemKey } from "../services/williamsForm";
-import Homunculus from "./Homunculus";
+import skeletalHomunculusImg from "../assets/skeletal_inventory_homunculus.png";
+import traumaHomunculusImg from "../assets/trauma_homunculus.png";
 
 // Osteometry order follows the Williams numbered list; measurements not on the
 // form are kept but appended at the end of their bone group.
@@ -166,6 +167,9 @@ const DonorView = () => {
   const [openGroups, setOpenGroups] = useState({});
   // Both tabs start closed; clicking a tab opens it, clicking the open tab closes it.
   const [activeTab, setActiveTab] = useState(null);
+  // Each Element Inventory subsection (Cranium, Axial, …) is individually collapsible.
+  const [elemOpen, setElemOpen] = useState({});
+  const toggleElem = (key) => setElemOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   const { canWrite, isAdmin } = useAuth();
   const { api } = useAPI();
   const navigate = useNavigate();
@@ -285,30 +289,43 @@ const DonorView = () => {
             <div>
               {ELEMENT_GROUPS.map(group => (
                 <Card key={group.key} className="mb-2">
-                  <Card.Header className="py-2 fw-semibold small">{group.label}</Card.Header>
-                  <Card.Body className="p-0">
-                    <Table size="sm" className="mb-0">
-                      <tbody>
-                        {group.elements.map(el => {
-                          const cell = inventory[elemKey(group.key, el.key)] ?? { absent: false, obs: "" };
-                          return (
-                            <tr key={el.key}>
-                              <td className="small fw-semibold" style={{ width: "30%" }}>{el.label}</td>
-                              <td style={{ width: 90 }}>
-                                <Badge bg={cell.absent ? "secondary" : "success"}>{cell.absent ? "Absent" : "Present"}</Badge>
-                              </td>
-                              <td className="small text-muted">{cell.obs || ""}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </Table>
-                  </Card.Body>
+                  <Card.Header
+                    onClick={() => toggleElem(group.key)}
+                    style={{ cursor: "pointer", userSelect: "none" }}
+                    className="py-2 fw-semibold small d-flex justify-content-between align-items-center"
+                  >
+                    <span>{group.label}</span>
+                    <span className="text-muted">{elemOpen[group.key] ? "▲" : "▼"}</span>
+                  </Card.Header>
+                  <Collapse in={!!elemOpen[group.key]}>
+                    <div>
+                      <Card.Body className="p-0">
+                        <Table size="sm" className="mb-0">
+                          <tbody>
+                            {group.elements.map(el => {
+                              const cell = inventory[elemKey(group.key, el.key)] ?? { absent: false, obs: "" };
+                              return (
+                                <tr key={el.key}>
+                                  <td className="small fw-semibold" style={{ width: "30%" }}>{el.label}</td>
+                                  <td style={{ width: 90 }}>
+                                    <Badge bg={cell.absent ? "secondary" : "success"}>{cell.absent ? "Absent" : "Present"}</Badge>
+                                  </td>
+                                  <td className="small text-muted">{cell.obs || ""}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </Table>
+                      </Card.Body>
+                    </div>
+                  </Collapse>
                 </Card>
               ))}
               {/* Skeletal Inventory Homunculus sits at the bottom of the section (per the form) */}
               <Card className="mb-2">
-                <Card.Body><Homunculus inventory={inventory} title="Skeletal Inventory Homunculus" /></Card.Body>
+                <Card.Body className="text-center">
+                  <img src={skeletalHomunculusImg} alt="Skeletal Inventory Homunculus" style={{ maxWidth: "100%", height: "auto", maxHeight: 560 }} />
+                </Card.Body>
               </Card>
             </div>
           </Collapse>
@@ -406,11 +423,11 @@ const DonorView = () => {
       )}
 
       {/* Trauma and General Observations Homunculus */}
-      {hasInventory && (
-        <Card className="mb-2 mt-3">
-          <Card.Body><Homunculus inventory={inventory} title="Trauma and General Observations Homunculus" /></Card.Body>
-        </Card>
-      )}
+      <Card className="mb-2 mt-3">
+        <Card.Body className="text-center">
+          <img src={traumaHomunculusImg} alt="Trauma and General Observations Homunculus" style={{ maxWidth: "100%", height: "auto", maxHeight: 560 }} />
+        </Card.Body>
+      </Card>
     </>
   );
 

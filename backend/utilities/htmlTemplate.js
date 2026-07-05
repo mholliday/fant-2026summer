@@ -155,7 +155,37 @@ const generateHtml = (donor) => {
 <body>
 <div class="document">
 
-  <!-- PAGE 1: WCU Skeletal Inventory -->
+  <!-- PAGE 1: Williams analysis form -->
+  <div class="header">
+    <h2 class="title">WILLIAMS COLLECTION — INVENTORY &amp; ANALYSIS</h2>
+    <span class="donor-id">Donor ID: ${esc(donor.donorID)}</span>
+  </div>
+
+  ${hasAnalysis ? `<h3>Analysis</h3><table>${analysisRows}</table>` : ""}
+
+  <h3>Element Inventory</h3>
+  <div class="inv-wrap">${inventoryGroups}</div>
+  ${SKELETAL_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${SKELETAL_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
+
+  ${noteBox("General Observations", notes.general_observations)}
+
+  <div class="pagebreak"></div>
+  <h3>Osteometry <span style="font-size:7px;font-weight:normal">(mm)</span></h3>
+  <div>${osteometryTables}</div>
+
+  ${noteBox("Trauma and Pathological Analysis", notes.trauma_and_pathological_analysis)}
+  ${instrExemplarsHtml("trauma")}
+
+  ${noteBox("General Observations", notes.general_observations_2)}
+  ${instrExemplarsHtml("general_observations_2")}
+
+  ${TRAUMA_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${TRAUMA_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
+
+  ${noteBox("Continuation to Skeletal Analysis", notes.continuation)}
+  ${instrExemplarsHtml("continuation")}
+
+  <!-- PAGE 2: WCU Skeletal Inventory -->
+  <div class="pagebreak"></div>
   <div class="header">
     <h2 class="title">SKELETAL INVENTORY</h2>
     <span class="donor-id">Donor ID: ${esc(donor.donorID)}</span>
@@ -207,36 +237,6 @@ const generateHtml = (donor) => {
   <table><tr><th>Rib</th><th>L</th><th>R</th><th>Rib</th><th>L</th><th>R</th></tr>${ribRows}</table>
 
   ${sk.comments ? `<p class="subhead">Comments</p><div class="box">${esc(sk.comments)}</div>` : ""}
-
-  <!-- PAGE 2: Williams analysis form -->
-  <div class="pagebreak"></div>
-  <div class="header">
-    <h2 class="title">WILLIAMS COLLECTION — INVENTORY &amp; ANALYSIS</h2>
-    <span class="donor-id">Donor ID: ${esc(donor.donorID)}</span>
-  </div>
-
-  ${hasAnalysis ? `<h3>Analysis</h3><table>${analysisRows}</table>` : ""}
-
-  <h3>Element Inventory</h3>
-  <div class="inv-wrap">${inventoryGroups}</div>
-  ${SKELETAL_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${SKELETAL_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
-
-  ${noteBox("General Observations", notes.general_observations)}
-
-  <div class="pagebreak"></div>
-  <h3>Osteometry <span style="font-size:7px;font-weight:normal">(mm)</span></h3>
-  <div>${osteometryTables}</div>
-
-  ${noteBox("Trauma and Pathological Analysis", notes.trauma_and_pathological_analysis)}
-  ${instrExemplarsHtml("trauma")}
-
-  ${noteBox("General Observations", notes.general_observations_2)}
-  ${instrExemplarsHtml("general_observations_2")}
-
-  ${TRAUMA_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${TRAUMA_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
-
-  ${noteBox("Continuation to Skeletal Analysis", notes.continuation)}
-  ${instrExemplarsHtml("continuation")}
 
 </div>
 </body>

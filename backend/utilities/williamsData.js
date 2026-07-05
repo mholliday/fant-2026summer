@@ -13,12 +13,13 @@ const ANALYSIS_FIELDS = [
   { key: "exemplars",    label: "Exemplars Used" },
 ];
 
+// Element order within each arm/leg follows the Williams .docx exactly.
 const ARM_ELEMENTS = [
   ["clavicle", "Clavicle"], ["scapula", "Scapula"], ["humerus", "Humerus"],
-  ["radius", "Radius"], ["ulna", "Ulna"], ["scaphoid", "Scaphoid"],
-  ["lunate", "Lunate"], ["triquetral", "Triquetral"], ["pisiform", "Pisiform"],
-  ["hamate", "Hamate"], ["capitate", "Capitate"], ["trapezoid", "Trapezoid"],
-  ["trapezium", "Trapezium"], ["metacarpals", "Metacarpals"],
+  ["radius", "Radius"], ["ulna", "Ulna"], ["hamate", "Hamate"],
+  ["capitate", "Capitate"], ["pisiform", "Pisiform"], ["lunate", "Lunate"],
+  ["trapezoid", "Trapezoid"], ["trapezium", "Trapezium"], ["triquetral", "Triquetral"],
+  ["scaphoid", "Scaphoid"], ["metacarpals", "Metacarpals"],
   ["phalanges_prox", "Phalanges — Proximal"],
   ["phalanges_inter", "Phalanges — Intermediate"],
   ["phalanges_dist", "Phalanges — Distal"],
@@ -26,8 +27,8 @@ const ARM_ELEMENTS = [
 
 const LEG_ELEMENTS = [
   ["innominate", "Innominate"], ["femur", "Femur"], ["patella", "Patella"],
-  ["tibia", "Tibia"], ["fibula", "Fibula"], ["calcaneus", "Calcaneus"],
-  ["talus", "Talus"], ["navicular", "Navicular"], ["cuboid", "Cuboid"],
+  ["tibia", "Tibia"], ["fibula", "Fibula"], ["cuboid", "Cuboid"],
+  ["talus", "Talus"], ["calcaneus", "Calcaneus"], ["navicular", "Navicular"],
   ["med_cuneiform", "Medial Cuneiform"], ["int_cuneiform", "Intermediate Cuneiform"],
   ["lat_cuneiform", "Lateral Cuneiform"], ["metatarsals", "Metatarsals"],
   ["phalanges_prox", "Phalanges — Proximal"],
@@ -46,8 +47,8 @@ const ELEMENT_GROUPS = [
     ["ribs_l", "L Ribs"], ["ribs_r", "R Ribs"], ["ribs_unsided", "Unsided Ribs"],
   ].map(([key, label]) => ({ key, label })) },
   { key: "left_arm", label: "Left Arm", elements: ARM_ELEMENTS },
-  { key: "right_arm", label: "Right Arm", elements: ARM_ELEMENTS },
   { key: "left_leg", label: "Left Leg", elements: LEG_ELEMENTS },
+  { key: "right_arm", label: "Right Arm", elements: ARM_ELEMENTS },
   { key: "right_leg", label: "Right Leg", elements: LEG_ELEMENTS },
   { key: "other", label: "Other", elements: [
     ["hyoid", "Hyoid"], ["sternum", "Sternum"], ["sesamoids", "Sesamoids"],
@@ -110,24 +111,24 @@ const absentBoneIds = (inventory = {}) => {
 const OSTEOMETRY_FIELDS = {
   Cranium: [
     ["maximum_cranial_length", "Max. Cranial Length (GOL)"], ["maximum_cranial_breadth", "Max. Cranial Breadth (XCB)"],
-    ["basion_bregma_height", "Basion-Bregma Height (BBH)"], ["bizygomatic_breadth", "Bizygomatic Breadth (ZYB)"],
+    ["bizygomatic_breadth", "Bizygomatic Breadth (ZYB)"], ["basion_bregma_height", "Basion-Bregma Height (BBH)"],
     ["cranial_base_length", "Cranial Base Length (BNL)"], ["basion_prosthion_length", "Basion-Prosthion Length (BPL)"],
     ["maxilloalveolar_breadth", "Maxillo-Alveolar Breadth (MAB)"], ["maxilloalveolar_length", "Maxillo-Alveolar Length (MAL)"],
     ["biauricular_breadth", "Biauricular Breadth (AUB)"], ["upper_facial_height", "Upper Facial Height (UFHT)"],
     ["min_frontal_breadth", "Min. Frontal Breadth (WFB)"], ["upper_facial_breadth", "Upper Facial Breadth (UFBR)"],
     ["nasal_height", "Nasal Height (NLH)"], ["nasal_breadth", "Nasal Breadth (NLB)"],
-    ["orbital_height", "Orbital Height (OBH)"], ["orbital_breadth", "Orbital Breadth (OBB)"],
-    ["interorbital_breadth", "Interorbital Breadth (DKB)"], ["biorbital_breadth", "Biorbital Breadth (EKB)"],
+    ["orbital_breadth", "Orbital Breadth (OBB)"], ["orbital_height", "Orbital Height (OBH)"],
+    ["biorbital_breadth", "Biorbital Breadth (EKB)"], ["interorbital_breadth", "Interorbital Breadth (DKB)"],
     ["frontal_chord", "Frontal Chord (FRC)"], ["parietal_chord", "Parietal Chord (PAC)"],
     ["occipital_chord", "Occipital Chord (OCC)"], ["foramen_magnum_length", "Foramen Magnum Length (FOL)"],
     ["foramen_magnum_breadth", "Foramen Magnum Breadth (FOB)"], ["mastoid_length", "Mastoid Length (MDH)"],
   ],
   Mandible: [
-    ["mandible_length", "Mandible Length"], ["bicondylar_breadth", "Bicondylar Breadth (CDB)"],
-    ["bigonial_breadth", "Bigonial Breadth (GOG)"], ["chin_height", "Chin Height (GNI)"],
-    ["mandibular_body_height", "Mandibular Body Height (HMF)"], ["mandibular_body_breadth", "Mandibular Body Breadth (TMF)"],
-    ["symphysis_height", "Symphysis Height"], ["min_ramus_breadth", "Min. Ramus Breadth (WRB)"],
-    ["max_ramus_breadth", "Max. Ramus Breadth (XRB)"], ["ramus_height", "Ramus Height"],
+    ["chin_height", "Chin Height (GNI)"], ["mandibular_body_height", "Mandibular Body Height (HMF)"],
+    ["mandibular_body_breadth", "Mandibular Body Breadth (TMF)"], ["bigonial_breadth", "Bigonial Breadth (GOG)"],
+    ["bicondylar_breadth", "Bicondylar Breadth (CDB)"], ["min_ramus_breadth", "Min. Ramus Breadth (WRB)"],
+    ["max_ramus_breadth", "Max. Ramus Breadth (XRB)"],
+    ["mandible_length", "Mandible Length"], ["symphysis_height", "Symphysis Height"], ["ramus_height", "Ramus Height"],
   ],
   Clavicle: [
     ["clavicle_max_length", "Maximum Length (XLN)"], ["clavicle_ap_diameter", "A-P Diameter Midshaft (APD)"],
@@ -147,8 +148,8 @@ const OSTEOMETRY_FIELDS = {
     ["radius_transverse_diameter", "M-L Diameter Midshaft (TVD)"],
   ],
   Ulna: [
-    ["ulna_max_length", "Maximum Length (XLN)"], ["ulna_physiological_length", "Physiological Length"],
-    ["ulna_dorso_volar_diam", "Dorso-Volar Diameter (DVD)"], ["ulna_transverse_diam", "Transverse Diameter (TVD)"],
+    ["ulna_max_length", "Maximum Length (XLN)"], ["ulna_dorso_volar_diam", "Dorso-Volar Diameter (DVD)"],
+    ["ulna_transverse_diam", "Transverse Diameter (TVD)"], ["ulna_physiological_length", "Physiological Length"],
   ],
   Sacrum: [
     ["sacrum_ant_height", "Anterior Height (AHT)"], ["sacrum_ant_sup_breadth", "Ant.-Sup. Breadth (ABR)"],

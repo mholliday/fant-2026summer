@@ -20,20 +20,22 @@ export const ANALYSIS_FIELDS = [
 // Each group has a list of elements. The stored key for an element is
 // `${group.key}__${element.key}` so identical element names on the left and
 // right sides stay distinct.
+// Element order within each arm/leg follows the Williams .docx exactly (note the
+// carpal/tarsal ordering is the form's, not anatomical alphabetical).
 const ARM_ELEMENTS = [
   { key: "clavicle",        label: "Clavicle" },
   { key: "scapula",         label: "Scapula" },
   { key: "humerus",         label: "Humerus" },
   { key: "radius",          label: "Radius" },
   { key: "ulna",            label: "Ulna" },
-  { key: "scaphoid",        label: "Scaphoid" },
-  { key: "lunate",          label: "Lunate" },
-  { key: "triquetral",      label: "Triquetral" },
-  { key: "pisiform",        label: "Pisiform" },
   { key: "hamate",          label: "Hamate" },
   { key: "capitate",        label: "Capitate" },
+  { key: "pisiform",        label: "Pisiform" },
+  { key: "lunate",          label: "Lunate" },
   { key: "trapezoid",       label: "Trapezoid" },
   { key: "trapezium",       label: "Trapezium" },
+  { key: "triquetral",      label: "Triquetral" },
+  { key: "scaphoid",        label: "Scaphoid" },
   { key: "metacarpals",     label: "Metacarpals" },
   { key: "phalanges_prox",  label: "Phalanges — Proximal" },
   { key: "phalanges_inter", label: "Phalanges — Intermediate" },
@@ -46,10 +48,10 @@ const LEG_ELEMENTS = [
   { key: "patella",         label: "Patella" },
   { key: "tibia",           label: "Tibia" },
   { key: "fibula",          label: "Fibula" },
-  { key: "calcaneus",       label: "Calcaneus" },
-  { key: "talus",           label: "Talus" },
-  { key: "navicular",       label: "Navicular" },
   { key: "cuboid",          label: "Cuboid" },
+  { key: "talus",           label: "Talus" },
+  { key: "calcaneus",       label: "Calcaneus" },
+  { key: "navicular",       label: "Navicular" },
   { key: "med_cuneiform",   label: "Medial Cuneiform" },
   { key: "int_cuneiform",   label: "Intermediate Cuneiform" },
   { key: "lat_cuneiform",   label: "Lateral Cuneiform" },
@@ -88,8 +90,8 @@ export const ELEMENT_GROUPS = [
     ],
   },
   { key: "left_arm",  label: "Left Arm",  elements: ARM_ELEMENTS },
-  { key: "right_arm", label: "Right Arm", elements: ARM_ELEMENTS },
   { key: "left_leg",  label: "Left Leg",  elements: LEG_ELEMENTS },
+  { key: "right_arm", label: "Right Arm", elements: ARM_ELEMENTS },
   { key: "right_leg", label: "Right Leg", elements: LEG_ELEMENTS },
   {
     key: "other", label: "Other",

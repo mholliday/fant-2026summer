@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, Stack, Spinner, Alert, Badge, Card, Table, Collapse } from "react-bootstrap";
+import { Button, Stack, Spinner, Alert, Badge, Card, Table, Collapse, Tabs, Tab } from "react-bootstrap";
 import { useAuth, useAPI } from "../contexts/AppContext";
 import { ANALYSIS_FIELDS, ELEMENT_GROUPS, elemKey } from "../services/williamsForm";
 import Homunculus from "./Homunculus";
 
+// Osteometry order follows the Williams numbered list; measurements not on the
+// form are kept but appended at the end of their bone group.
 const OSTEOMETRY_FIELDS = {
   cranium: [
     { key: "maximum_cranial_length",     label: "Maximum Cranial Length (GOL)",          unit: "mm" },
     { key: "maximum_cranial_breadth",    label: "Maximum Cranial Breadth (XCB)",         unit: "mm" },
-    { key: "basion_bregma_height",       label: "Basion-Bregma Height (BBH)",            unit: "mm" },
     { key: "bizygomatic_breadth",        label: "Bizygomatic Breadth (ZYB)",             unit: "mm" },
+    { key: "basion_bregma_height",       label: "Basion-Bregma Height (BBH)",            unit: "mm" },
     { key: "cranial_base_length",        label: "Cranial Base Length (BNL)",             unit: "mm" },
     { key: "basion_prosthion_length",    label: "Basion-Prosthion Length (BPL)",         unit: "mm" },
     { key: "maxilloalveolar_breadth",    label: "Maxillo-Alveolar Breadth (MAB)",        unit: "mm" },
@@ -21,10 +23,10 @@ const OSTEOMETRY_FIELDS = {
     { key: "upper_facial_breadth",       label: "Upper Facial Breadth (UFBR)",           unit: "mm" },
     { key: "nasal_height",               label: "Nasal Height (NLH)",                    unit: "mm" },
     { key: "nasal_breadth",              label: "Nasal Breadth (NLB)",                   unit: "mm" },
-    { key: "orbital_height",             label: "Orbital Height (OBH)",                  unit: "mm" },
     { key: "orbital_breadth",            label: "Orbital Breadth (OBB)",                 unit: "mm" },
-    { key: "interorbital_breadth",       label: "Interorbital Breadth (DKB)",            unit: "mm" },
+    { key: "orbital_height",             label: "Orbital Height (OBH)",                  unit: "mm" },
     { key: "biorbital_breadth",          label: "Biorbital Breadth (EKB)",               unit: "mm" },
+    { key: "interorbital_breadth",       label: "Interorbital Breadth (DKB)",            unit: "mm" },
     { key: "frontal_chord",              label: "Frontal Chord (FRC)",                   unit: "mm" },
     { key: "parietal_chord",             label: "Parietal Chord (PAC)",                  unit: "mm" },
     { key: "occipital_chord",            label: "Occipital Chord (OCC)",                 unit: "mm" },
@@ -33,15 +35,15 @@ const OSTEOMETRY_FIELDS = {
     { key: "mastoid_length",             label: "Mastoid Length (MDH)",                  unit: "mm" },
   ],
   mandible: [
-    { key: "mandible_length",            label: "Mandible Length",                       unit: "mm" },
-    { key: "bicondylar_breadth",         label: "Bicondylar Breadth (CDB)",              unit: "mm" },
-    { key: "bigonial_breadth",           label: "Bigonial Breadth (GOG)",                unit: "mm" },
     { key: "chin_height",                label: "Chin Height (GNI)",                     unit: "mm" },
     { key: "mandibular_body_height",     label: "Height of Mandibular Body (HMF)",       unit: "mm" },
     { key: "mandibular_body_breadth",    label: "Breadth of Mandibular Body (TMF)",      unit: "mm" },
-    { key: "symphysis_height",           label: "Symphysis Height",                      unit: "mm" },
+    { key: "bigonial_breadth",           label: "Bigonial Breadth (GOG)",                unit: "mm" },
+    { key: "bicondylar_breadth",         label: "Bicondylar Breadth (CDB)",              unit: "mm" },
     { key: "min_ramus_breadth",          label: "Minimum Ramus Breadth (WRB)",           unit: "mm" },
     { key: "max_ramus_breadth",          label: "Maximum Ramus Breadth (XRB)",           unit: "mm" },
+    { key: "mandible_length",            label: "Mandible Length",                       unit: "mm" },
+    { key: "symphysis_height",           label: "Symphysis Height",                      unit: "mm" },
     { key: "ramus_height",               label: "Ramus Height",                          unit: "mm" },
   ],
   clavicle: [
@@ -69,9 +71,9 @@ const OSTEOMETRY_FIELDS = {
   ],
   ulna: [
     { key: "ulna_max_length",            label: "Maximum Length (XLN)",                  unit: "mm" },
-    { key: "ulna_physiological_length",  label: "Physiological Length",                  unit: "mm" },
     { key: "ulna_dorso_volar_diam",      label: "Dorso-Volar Diameter (DVD)",            unit: "mm" },
     { key: "ulna_transverse_diam",       label: "Transverse Diameter (TVD)",             unit: "mm" },
+    { key: "ulna_physiological_length",  label: "Physiological Length",                  unit: "mm" },
   ],
   sacrum: [
     { key: "sacrum_ant_height",          label: "Anterior Height (AHT)",                 unit: "mm" },
@@ -142,7 +144,8 @@ const codeDisplay = (v) => v ? (CODE_LABELS[v] ?? v) : "—";
 const SKULL_SINGLES   = ["frontal","occipital","ethmoid","vomer","sphenoid","mandible"];
 const SKULL_BILATERAL = ["parietal","temporal","zygomatic","palatine","maxilla","nasal","lacrimal"];
 const SKULL_LABELS    = { frontal:"Frontal", occipital:"Occipital", ethmoid:"Ethmoid", vomer:"Vomer", sphenoid:"Sphenoid", mandible:"Mandible", parietal:"Parietal", temporal:"Temporal", zygomatic:"Zygomatic", palatine:"Palatine", maxilla:"Maxilla", nasal:"Nasal", lacrimal:"Lacrimal" };
-const AXIAL_SINGLES   = ["hyoid","manubrium","sternal_body","xiphoid","sacrum","coccyx"];
+// Sacrum & Coccyx are shown within the Vertebrae section (per the SKELETAL PDF).
+const AXIAL_SINGLES   = ["hyoid","manubrium","sternal_body","xiphoid"];
 const AXIAL_LABELS    = { hyoid:"Hyoid", manubrium:"Manubrium", sternal_body:"Sternal Body", xiphoid:"Xiphoid", sacrum:"Sacrum", coccyx:"Coccyx" };
 const GIRDLE_BILATERAL = ["clavicle","scapula","ischium","ilium","pubis"];
 const GIRDLE_LABELS   = { clavicle:"Clavicle", scapula:"Scapula", ischium:"Ischium", ilium:"Ilium", pubis:"Pubis" };
@@ -152,7 +155,6 @@ const TARSAL_BONES    = ["calcaneus","talus","navicular","cuboid","cuneiform1","
 const TARSAL_LABELS   = { calcaneus:"Calcaneus", talus:"Talus", navicular:"Navicular", cuboid:"Cuboid", cuneiform1:"Cuneiform I", cuneiform2:"Cuneiform II", cuneiform3:"Cuneiform III", patella:"Patella" };
 const LONG_BONES      = ["humerus","radius","ulna","femur","tibia","fibula"];
 const LONG_LABELS     = { humerus:"Humerus", radius:"Radius", ulna:"Ulna", femur:"Femur", tibia:"Tibia", fibula:"Fibula" };
-const TOOTH_CODES     = { N:"Natural", A:"Antemortem absence", P:"Postmortem absence", D:"Dental work" };
 
 const DonorView = () => {
   const { did } = useParams();
@@ -265,92 +267,10 @@ const DonorView = () => {
     <span className={val ? "fw-semibold" : "text-muted"}>{codeDisplay(val)}</span>
   );
 
-  return (
-    <div>
-      <Stack direction="horizontal" className="mb-3" gap={2}>
-        <h2 className="me-auto">
-          Donor {donor.donorID}
-          {donor.archived && <Badge bg="secondary" className="ms-2">Archived</Badge>}
-        </h2>
-        {canWrite && !donor.archived && (
-          <>
-            <Button variant="outline-primary" onClick={() => navigate(`/donor/update/${did}`)}>Edit</Button>
-            <Button variant="outline-warning" onClick={handleArchive}>Archive</Button>
-          </>
-        )}
-        {isAdmin && donor.archived && (
-          <>
-            <Button variant="outline-success" onClick={handleRestore}>Restore</Button>
-            <Button variant="outline-danger" onClick={handleDelete}>Delete Permanently</Button>
-          </>
-        )}
-        <Button variant="outline-secondary" onClick={handleGetPDF}>Export PDF</Button>
-        <Button variant="outline-secondary" onClick={() => navigate(-1)}>Back</Button>
-      </Stack>
-
-      {error && <Alert variant="danger">{error}</Alert>}
-      {actionMsg && <Alert variant="success">{actionMsg}</Alert>}
-
-      {/* Identification + Metadata */}
-      <div className="row mb-3">
-        <div className="col-md-6">
-          <h5>Identification</h5>
-          <Table size="sm" bordered>
-            <tbody>
-              {Object.entries(id).map(([k, v]) => (
-                <tr key={k}>
-                  <td className="fw-semibold text-capitalize" style={{ width: "45%" }}>{k.replace(/_/g, " ")}</td>
-                  <td>{String(v)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-        <div className="col-md-6">
-          <h5>Metadata</h5>
-          <Table size="sm" bordered>
-            <tbody>
-              <tr><td className="fw-semibold" style={{ width: "45%" }}>Created By</td><td>{donor.createdBy}</td></tr>
-              <tr><td className="fw-semibold">Created</td><td>{new Date(donor.creationTime).toLocaleString()}</td></tr>
-              <tr><td className="fw-semibold">Last Modified By</td><td>{donor.modifiedBy}</td></tr>
-              <tr><td className="fw-semibold">Last Modified</td><td>{donor.modificationTime ? new Date(donor.modificationTime).toLocaleString() : "—"}</td></tr>
-              <tr><td className="fw-semibold">Versions</td><td>{donor.numVersions}</td></tr>
-            </tbody>
-          </Table>
-        </div>
-      </div>
-
-      {/* Reference Forms (blank originals) */}
-      <div className="mb-3">
-        <h5>Reference Forms</h5>
-        <Stack direction="horizontal" gap={2}>
-          <Button size="sm" variant="outline-secondary" href={`${refBase}skeletal-inventory.pdf`} target="_blank" rel="noreferrer">
-            SKELETAL INVENTORY.pdf
-          </Button>
-          <Button size="sm" variant="outline-secondary" href={`${refBase}williams-collection-forms.docx`} target="_blank" rel="noreferrer">
-            Williams Collection Forms (.docx)
-          </Button>
-        </Stack>
-      </div>
-
-      {/* Analysis (Williams form header) */}
-      {hasAnalysis && (
-        <div className="mb-3">
-          <h5>Analysis</h5>
-          <Table size="sm" bordered>
-            <tbody>
-              {ANALYSIS_FIELDS.filter(f => analysis[f.key]).map(f => (
-                <tr key={f.key}>
-                  <td className="fw-semibold" style={{ width: "30%" }}>{f.label}</td>
-                  <td style={{ whiteSpace: "pre-wrap" }}>{analysis[f.key]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      )}
-
-      {/* Element Inventory (Present/Absent) + Homunculus */}
+  // ---- Williams Analysis form ----------------------------------------------
+  const williamsView = (
+    <>
+      {/* Element Inventory (Present/Absent) + Skeletal Inventory Homunculus */}
       {hasInventory && (
         <div className="mb-4">
           <Card className="mb-2">
@@ -390,8 +310,7 @@ const DonorView = () => {
                 <div className="col-lg-3">
                   <div className="position-sticky" style={{ top: 16 }}>
                     <Card>
-                      <Card.Header className="py-2 fw-semibold small">Homunculus</Card.Header>
-                      <Card.Body><Homunculus inventory={inventory} /></Card.Body>
+                      <Card.Body><Homunculus inventory={inventory} title="Skeletal Inventory Homunculus" /></Card.Body>
                     </Card>
                   </div>
                 </div>
@@ -400,6 +319,171 @@ const DonorView = () => {
           </Collapse>
         </div>
       )}
+
+      {/* Analysis (Williams form header) */}
+      {hasAnalysis && (
+        <div className="mb-3">
+          <h5>Analysis</h5>
+          <Table size="sm" bordered>
+            <tbody>
+              {ANALYSIS_FIELDS.filter(f => analysis[f.key]).map(f => (
+                <tr key={f.key}>
+                  <td className="fw-semibold" style={{ width: "30%" }}>{f.label}</td>
+                  <td style={{ whiteSpace: "pre-wrap" }}>{analysis[f.key]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      )}
+
+      {/* General Observations (first box) */}
+      {notes.general_observations && (
+        <Card className="mb-2">
+          <Card.Header className="py-2 fw-semibold">General Observations</Card.Header>
+          <Card.Body className="py-2" style={{ whiteSpace: "pre-wrap" }}>{notes.general_observations}</Card.Body>
+        </Card>
+      )}
+
+      {/* Osteometry */}
+      <h5 className="mt-3">Osteometry</h5>
+      {Object.entries(OSTEOMETRY_FIELDS).map(([group, fields]) => {
+        const hasData = groupHasData(fields);
+        const isOpen = !!openGroups[group];
+        const recordedCount = fields.filter(({ key }) => osteometry[key] !== "" && osteometry[key] != null).length;
+
+        return (
+          <Card key={group} className="mb-2">
+            <Card.Header
+              onClick={() => toggleGroup(group)}
+              style={{ cursor: "pointer", userSelect: "none" }}
+              className="py-2 d-flex justify-content-between align-items-center"
+            >
+              <span className="fw-semibold">{BONE_GROUP_LABELS[group]}</span>
+              <span className="d-flex align-items-center gap-3">
+                {hasData
+                  ? <Badge bg="primary">{recordedCount} / {fields.length} recorded</Badge>
+                  : <span className="text-muted small">No measurements recorded</span>
+                }
+                <span className="text-muted">{isOpen ? "▲" : "▼"}</span>
+              </span>
+            </Card.Header>
+            <Collapse in={isOpen}>
+              <div>
+                <Card.Body className="p-2">
+                  <div className="row g-2">
+                    {fields.map(({ key, label, unit }) => {
+                      const val = osteometry[key];
+                      const hasVal = val !== "" && val != null;
+                      return (
+                        <div key={key} className="col-md-4 col-sm-6">
+                          <div className={`border rounded px-2 py-1 ${hasVal ? "bg-light" : "bg-white text-muted"}`}>
+                            <div className="small">{label}</div>
+                            <div className={hasVal ? "fw-semibold" : "fst-italic small"}>
+                              {hasVal ? <>{val} <span className="text-muted fw-normal">{unit}</span></> : "—"}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card.Body>
+              </div>
+            </Collapse>
+          </Card>
+        );
+      })}
+
+      {/* Trauma and Pathological Analysis */}
+      {notes.trauma_and_pathological_analysis && (
+        <Card className="mb-2 mt-3">
+          <Card.Header className="py-2 fw-semibold">Trauma and Pathological Analysis</Card.Header>
+          <Card.Body className="py-2" style={{ whiteSpace: "pre-wrap" }}>{notes.trauma_and_pathological_analysis}</Card.Body>
+        </Card>
+      )}
+
+      {/* General Observations (second box) */}
+      {notes.general_observations_2 && (
+        <Card className="mb-2">
+          <Card.Header className="py-2 fw-semibold">General Observations</Card.Header>
+          <Card.Body className="py-2" style={{ whiteSpace: "pre-wrap" }}>{notes.general_observations_2}</Card.Body>
+        </Card>
+      )}
+
+      {/* Trauma and General Observations Homunculus */}
+      {hasInventory && (
+        <Card className="mb-2 mt-3">
+          <Card.Body><Homunculus inventory={inventory} title="Trauma and General Observations Homunculus" /></Card.Body>
+        </Card>
+      )}
+    </>
+  );
+
+  // ---- SKELETAL INVENTORY form ---------------------------------------------
+  const skeletalView = (
+    <>
+      {/* Identification header (start of the SKELETAL INVENTORY form) */}
+      <div className="mb-3">
+        <h5>Identification <span className="text-muted fw-normal small">SKELETAL INVENTORY header</span></h5>
+        <Table size="sm" bordered>
+          <tbody>
+            {Object.entries(id).map(([k, v]) => (
+              <tr key={k}>
+                <td className="fw-semibold text-capitalize" style={{ width: "45%" }}>{k.replace(/_/g, " ")}</td>
+                <td>{String(v)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+
+      {/* Dentition */}
+      <div className="mb-4">
+        <Card className="mb-2">
+          <Card.Header onClick={() => toggleGroup("_dentition")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center py-2">
+            <span className="fw-semibold">Dentition</span>
+            <span className="d-flex align-items-center gap-3">
+              <span className="text-muted small">A=antemortem absence, P=postmortem absence, N=natural, D=dental work</span>
+              <span className="text-muted">{openGroups["_dentition"] ? "▲" : "▼"}</span>
+            </span>
+          </Card.Header>
+        </Card>
+        <Collapse in={!!openGroups["_dentition"]}>
+        <div>
+          <p className="text-muted small mb-2 mt-1">A=antemortem absence, P=postmortem absence, N=natural, D=dental work</p>
+          <Card className="mb-2">
+            <Card.Header className="py-2 small fw-semibold">Upper jaw (teeth 1–16)</Card.Header>
+            <Card.Body className="py-2">
+              <div className="d-flex flex-wrap gap-2">
+                {Array.from({ length: 16 }, (_, i) => (
+                  <div key={i} className="text-center" style={{ minWidth: 40 }}>
+                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>{i + 1}</div>
+                    <Badge bg={teeth[i] === "N" ? "light" : teeth[i] === "A" ? "danger" : teeth[i] === "P" ? "warning" : "info"} text={teeth[i] === "N" ? "dark" : undefined}>
+                      {teeth[i]}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </Card.Body>
+          </Card>
+          <Card>
+            <Card.Header className="py-2 small fw-semibold">Lower jaw (teeth 17–32)</Card.Header>
+            <Card.Body className="py-2">
+              <div className="d-flex flex-wrap gap-2">
+                {Array.from({ length: 16 }, (_, i) => (
+                  <div key={i + 16} className="text-center" style={{ minWidth: 40 }}>
+                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>{i + 17}</div>
+                    <Badge bg={teeth[i+16] === "N" ? "light" : teeth[i+16] === "A" ? "danger" : teeth[i+16] === "P" ? "warning" : "info"} text={teeth[i+16] === "N" ? "dark" : undefined}>
+                      {teeth[i + 16]}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </Card.Body>
+          </Card>
+        </div>
+        </Collapse>
+      </div>
 
       {/* Skeletal Inventory */}
       <div className="mb-4">
@@ -415,13 +499,6 @@ const DonorView = () => {
         <Collapse in={!!openGroups["_skeleton"]}>
         <div>
           <p className="text-muted small mb-2 mt-1">Codes: 1=100% complete, 2=99–75%, 3=74–25%, 4=&lt;25%, 5=absent</p>
-
-          {(skeleton.recorder || skeleton.date) && (
-            <p className="small mb-2">
-              {skeleton.recorder && <><strong>Recorder:</strong> {skeleton.recorder}&nbsp;&nbsp;</>}
-              {skeleton.date && <><strong>Date:</strong> {skeleton.date}</>}
-            </p>
-          )}
 
           {/* Cranial */}
           <Card className="mb-2">
@@ -459,7 +536,6 @@ const DonorView = () => {
                   <div key={k} className="text-center">
                     <div className="text-muted small">{AXIAL_LABELS[k]}</div>
                     <BoneCell val={skeleton[k]} />
-                    {k === "coccyx" && skeleton.coccyx_count && <span className="text-muted small ms-1">(#{skeleton.coccyx_count})</span>}
                   </div>
                 ))}
               </div>
@@ -606,6 +682,17 @@ const DonorView = () => {
                   </div>
                 </div>
               ))}
+              <div className="d-flex flex-wrap gap-3 mt-2">
+                <div className="text-center">
+                  <div className="text-muted small">{AXIAL_LABELS.sacrum}</div>
+                  <BoneCell val={skeleton.sacrum} />
+                </div>
+                <div className="text-center">
+                  <div className="text-muted small">{AXIAL_LABELS.coccyx}</div>
+                  <BoneCell val={skeleton.coccyx} />
+                  {skeleton.coccyx_count && <span className="text-muted small ms-1">(#{skeleton.coccyx_count})</span>}
+                </div>
+              </div>
             </Card.Body>
           </Card>
 
@@ -642,122 +729,70 @@ const DonorView = () => {
         </div>
         </Collapse>
       </div>
+    </>
+  );
 
-      {/* Dentition */}
-      <div className="mb-4">
-        <Card className="mb-2">
-          <Card.Header onClick={() => toggleGroup("_dentition")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center py-2">
-            <span className="fw-semibold">Dentition</span>
-            <span className="d-flex align-items-center gap-3">
-              <span className="text-muted small">A=antemortem absence, P=postmortem absence, N=natural, D=dental work</span>
-              <span className="text-muted">{openGroups["_dentition"] ? "▲" : "▼"}</span>
-            </span>
-          </Card.Header>
-        </Card>
-        <Collapse in={!!openGroups["_dentition"]}>
-        <div>
-          <p className="text-muted small mb-2 mt-1">A=antemortem absence, P=postmortem absence, N=natural, D=dental work</p>
-          <Card className="mb-2">
-            <Card.Header className="py-2 small fw-semibold">Upper jaw (teeth 1–16)</Card.Header>
-            <Card.Body className="py-2">
-              <div className="d-flex flex-wrap gap-2">
-                {Array.from({ length: 16 }, (_, i) => (
-                  <div key={i} className="text-center" style={{ minWidth: 40 }}>
-                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>{i + 1}</div>
-                    <Badge bg={teeth[i] === "N" ? "light" : teeth[i] === "A" ? "danger" : teeth[i] === "P" ? "warning" : "info"} text={teeth[i] === "N" ? "dark" : undefined}>
-                      {teeth[i]}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
-          <Card>
-            <Card.Header className="py-2 small fw-semibold">Lower jaw (teeth 17–32)</Card.Header>
-            <Card.Body className="py-2">
-              <div className="d-flex flex-wrap gap-2">
-                {Array.from({ length: 16 }, (_, i) => (
-                  <div key={i + 16} className="text-center" style={{ minWidth: 40 }}>
-                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>{i + 17}</div>
-                    <Badge bg={teeth[i+16] === "N" ? "light" : teeth[i+16] === "A" ? "danger" : teeth[i+16] === "P" ? "warning" : "info"} text={teeth[i+16] === "N" ? "dark" : undefined}>
-                      {teeth[i + 16]}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
-        </div>
-        </Collapse>
+  return (
+    <div>
+      <Stack direction="horizontal" className="mb-3" gap={2}>
+        <h2 className="me-auto">
+          Donor {donor.donorID}
+          {donor.archived && <Badge bg="secondary" className="ms-2">Archived</Badge>}
+        </h2>
+        {canWrite && !donor.archived && (
+          <>
+            <Button variant="outline-primary" onClick={() => navigate(`/donor/update/${did}`)}>Edit</Button>
+            <Button variant="outline-warning" onClick={handleArchive}>Archive</Button>
+          </>
+        )}
+        {isAdmin && donor.archived && (
+          <>
+            <Button variant="outline-success" onClick={handleRestore}>Restore</Button>
+            <Button variant="outline-danger" onClick={handleDelete}>Delete Permanently</Button>
+          </>
+        )}
+        <Button variant="outline-secondary" onClick={handleGetPDF}>Export PDF</Button>
+        <Button variant="outline-secondary" onClick={() => navigate(-1)}>Back</Button>
+      </Stack>
+
+      {error && <Alert variant="danger">{error}</Alert>}
+      {actionMsg && <Alert variant="success">{actionMsg}</Alert>}
+
+      {/* Metadata (record housekeeping — shared across both forms) */}
+      <div className="mb-3">
+        <h5>Metadata</h5>
+        <Table size="sm" bordered>
+          <tbody>
+            <tr><td className="fw-semibold" style={{ width: "45%" }}>Created By</td><td>{donor.createdBy}</td></tr>
+            <tr><td className="fw-semibold">Created</td><td>{new Date(donor.creationTime).toLocaleString()}</td></tr>
+            <tr><td className="fw-semibold">Last Modified By</td><td>{donor.modifiedBy}</td></tr>
+            <tr><td className="fw-semibold">Last Modified</td><td>{donor.modificationTime ? new Date(donor.modificationTime).toLocaleString() : "—"}</td></tr>
+            <tr><td className="fw-semibold">Versions</td><td>{donor.numVersions}</td></tr>
+          </tbody>
+        </Table>
       </div>
 
-      {/* Osteometry */}
-      <h5>Osteometry</h5>
-      {Object.entries(OSTEOMETRY_FIELDS).map(([group, fields]) => {
-        const hasData = groupHasData(fields);
-        const isOpen = !!openGroups[group];
-        const recordedCount = fields.filter(({ key }) => osteometry[key] !== "" && osteometry[key] != null).length;
+      {/* Reference Forms (blank originals) */}
+      <div className="mb-3">
+        <h5>Reference Forms</h5>
+        <Stack direction="horizontal" gap={2}>
+          <Button size="sm" variant="outline-secondary" href={`${refBase}skeletal-inventory.pdf`} target="_blank" rel="noreferrer">
+            SKELETAL INVENTORY.pdf
+          </Button>
+          <Button size="sm" variant="outline-secondary" href={`${refBase}williams-collection-forms.docx`} target="_blank" rel="noreferrer">
+            Williams Collection Forms (.docx)
+          </Button>
+        </Stack>
+      </div>
 
-        return (
-          <Card key={group} className="mb-2">
-            <Card.Header
-              onClick={() => toggleGroup(group)}
-              style={{ cursor: "pointer", userSelect: "none" }}
-              className="py-2 d-flex justify-content-between align-items-center"
-            >
-              <span className="fw-semibold">{BONE_GROUP_LABELS[group]}</span>
-              <span className="d-flex align-items-center gap-3">
-                {hasData
-                  ? <Badge bg="primary">{recordedCount} / {fields.length} recorded</Badge>
-                  : <span className="text-muted small">No measurements recorded</span>
-                }
-                <span className="text-muted">{isOpen ? "▲" : "▼"}</span>
-              </span>
-            </Card.Header>
-            <Collapse in={isOpen}>
-              <div>
-                <Card.Body className="p-2">
-                  <div className="row g-2">
-                    {fields.map(({ key, label, unit }) => {
-                      const val = osteometry[key];
-                      const hasVal = val !== "" && val != null;
-                      return (
-                        <div key={key} className="col-md-4 col-sm-6">
-                          <div className={`border rounded px-2 py-1 ${hasVal ? "bg-light" : "bg-white text-muted"}`}>
-                            <div className="small">{label}</div>
-                            <div className={hasVal ? "fw-semibold" : "fst-italic small"}>
-                              {hasVal ? <>{val} <span className="text-muted fw-normal">{unit}</span></> : "—"}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Card.Body>
-              </div>
-            </Collapse>
-          </Card>
-        );
-      })}
-
-      {/* Notes */}
-      {(notes.general_observations || notes.trauma_and_pathological_analysis) && (
-        <div className="mt-3">
-          <h5>Notes</h5>
-          {notes.general_observations && (
-            <Card className="mb-2">
-              <Card.Header className="py-2 fw-semibold">General Observations</Card.Header>
-              <Card.Body className="py-2" style={{ whiteSpace: "pre-wrap" }}>{notes.general_observations}</Card.Body>
-            </Card>
-          )}
-          {notes.trauma_and_pathological_analysis && (
-            <Card className="mb-2">
-              <Card.Header className="py-2 fw-semibold">Trauma and Pathological Analysis</Card.Header>
-              <Card.Body className="py-2" style={{ whiteSpace: "pre-wrap" }}>{notes.trauma_and_pathological_analysis}</Card.Body>
-            </Card>
-          )}
-        </div>
-      )}
+      <Tabs defaultActiveKey="williams" className="mb-3">
+        <Tab eventKey="williams" title="Williams Analysis">
+          {williamsView}
+        </Tab>
+        <Tab eventKey="skeletal" title="Skeletal Inventory">
+          {skeletalView}
+        </Tab>
+      </Tabs>
 
       {/* Version History */}
       {versions.length > 1 && (

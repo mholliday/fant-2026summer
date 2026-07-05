@@ -52,6 +52,14 @@ const generateHtml = (donor) => {
   const inventory = d.element_inventory ?? {};
   const osteo = d.osteometry ?? {};
 
+  // ---- Note boxes (always rendered so empty fields still show on the form) ----
+  const noteBox = (title, value) => `<p class="subhead">${esc(title)}</p><div class="box">${esc(value)}</div>`;
+  const instrExemplarsHtml = (base) =>
+    `<div class="two-col">
+      <div>${noteBox("Instruments/Equipment Used (Type and ID#)", notes[`${base}_instruments`])}</div>
+      <div>${noteBox("Exemplars Used", notes[`${base}_exemplars`])}</div>
+    </div>`;
+
   // ---- Skeletal inventory bone tables (page 1) ----
   const singleCell = (k, label) => `<td class="bone"><span class="lbl">${label}</span><span class="v">${code(sk[k])}</span></td>`;
   const lrCell = (k, label) => `<td class="bone"><span class="lbl">${label}</span><span class="v">L ${code(sk[`${k}_l`])} / R ${code(sk[`${k}_r`])}</span></td>`;
@@ -139,7 +147,7 @@ const generateHtml = (donor) => {
     .inv-wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
     .inv { width: 48%; }
     .osteo { width: 31%; display: inline-table; vertical-align: top; margin-right: 1%; }
-    .box { border: 1px solid #000; padding: 8px; margin-top: 4px; white-space: pre-wrap; }
+    .box { border: 1px solid #000; padding: 8px; margin-top: 4px; min-height: 48px; white-space: pre-wrap; }
     .pagebreak { page-break-before: always; }
     .legend span { display: inline-block; width: 10px; height: 10px; border: 1px solid #6c757d; vertical-align: middle; }
   </style>
@@ -213,18 +221,22 @@ const generateHtml = (donor) => {
   <div class="inv-wrap">${inventoryGroups}</div>
   ${SKELETAL_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${SKELETAL_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
 
-  ${notes.general_observations ? `<p class="subhead">General Observations</p><div class="box">${esc(notes.general_observations)}</div>` : ""}
+  ${noteBox("General Observations", notes.general_observations)}
 
   <div class="pagebreak"></div>
   <h3>Osteometry <span style="font-size:7px;font-weight:normal">(mm)</span></h3>
   <div>${osteometryTables}</div>
 
-  ${notes.trauma_and_pathological_analysis ? `<p class="subhead">Trauma and Pathological Analysis</p><div class="box">${esc(notes.trauma_and_pathological_analysis)}</div>` : ""}
-  ${notes.general_observations_2 ? `<p class="subhead">General Observations</p><div class="box">${esc(notes.general_observations_2)}</div>` : ""}
+  ${noteBox("Trauma and Pathological Analysis", notes.trauma_and_pathological_analysis)}
+  ${instrExemplarsHtml("trauma")}
+
+  ${noteBox("General Observations", notes.general_observations_2)}
+  ${instrExemplarsHtml("general_observations_2")}
 
   ${TRAUMA_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${TRAUMA_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
 
-  ${notes.continuation ? `<p class="subhead">Continuation to Skeletal Analysis</p><div class="box">${esc(notes.continuation)}</div>` : ""}
+  ${noteBox("Continuation to Skeletal Analysis", notes.continuation)}
+  ${instrExemplarsHtml("continuation")}
 
 </div>
 </body>

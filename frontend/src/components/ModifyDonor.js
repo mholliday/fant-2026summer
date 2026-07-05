@@ -149,6 +149,8 @@ const BONE_GROUP_LABELS = {
 
 const SKULL_SINGLES   = ["frontal","occipital","ethmoid","vomer","sphenoid","mandible"];
 const SKULL_BILATERAL = ["parietal","temporal","zygomatic","palatine","maxilla","nasal","lacrimal"];
+// Skull bones in the SKELETAL form's column order (col 1 top→bottom, then col 2).
+const SKULL_ORDER     = ["frontal","occipital","parietal","temporal","zygomatic","palatine","mandible","maxilla","nasal","ethmoid","lacrimal","vomer","sphenoid"];
 const SKULL_LABELS    = { frontal:"Frontal", occipital:"Occipital", ethmoid:"Ethmoid", vomer:"Vomer", sphenoid:"Sphenoid", mandible:"Mandible", parietal:"Parietal", temporal:"Temporal", zygomatic:"Zygomatic", palatine:"Palatine", maxilla:"Maxilla", nasal:"Nasal", lacrimal:"Lacrimal" };
 // Sacrum and Coccyx live in the Vertebrae section (per the SKELETAL INVENTORY
 // PDF), not with the small axial elements.
@@ -250,6 +252,9 @@ const ModifyDonor = ({ create = false }) => {
   // Each Osteometry subsection (Cranium, Mandible, …) is individually collapsible.
   const [osteoOpen, setOsteoOpen] = useState({});
   const toggleOsteo = (key) => setOsteoOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+  // Each Skeletal Inventory subsection (Cranial, Axial, …) is individually collapsible.
+  const [skelOpen, setSkelOpen] = useState({});
+  const toggleSkel = (key) => setSkelOpen((prev) => ({ ...prev, [key]: !prev[key] }));
 
   useEffect(() => {
     if (create) {
@@ -344,6 +349,18 @@ const ModifyDonor = ({ create = false }) => {
       <option value="">{placeholder}</option>
       {COMP_CODES.map(v => <option key={v} value={v}>{v}</option>)}
     </Form.Select>
+  );
+
+  // Collapsible subsection heading for the Skeletal Inventory section.
+  const skelHead = (sk, title) => (
+    <h6
+      onClick={() => toggleSkel(sk)}
+      style={{ cursor: "pointer", userSelect: "none" }}
+      className="text-uppercase text-muted border-bottom pb-1 mb-2 d-flex justify-content-between align-items-center"
+    >
+      <span>{title}</span>
+      <span>{skelOpen[sk] ? "▲" : "▼"}</span>
+    </h6>
   );
 
   // Instruments/Equipment Used + Exemplars Used pair that the Williams form
@@ -663,37 +680,35 @@ const ModifyDonor = ({ create = false }) => {
         </Card.Header>
         <Collapse in={open.skeleton}><div>
         <Card.Body>
-          {/* Cranial — single */}
-          <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Cranial</h6>
-          <div className="row g-2 mb-2">
-            {SKULL_SINGLES.map(k => (
-              <div key={k} className="col-md-2 col-sm-4">
-                <Form.Label className="small mb-1">{SKULL_LABELS[k]}</Form.Label>
-                <CodeSelect field={k} />
+          {/* Cranial — CSS columns so bones read top-to-bottom per the SKELETAL form */}
+          {skelHead("cranial", "Cranial")}
+          <Collapse in={!!skelOpen.cranial}><div>
+          <div className="mb-3" style={{ columnCount: 2, columnGap: "0.75rem" }}>
+            {SKULL_ORDER.map(k => (
+              <div key={k} className="mb-2" style={{ breakInside: "avoid" }}>
+                <Form.Label className="small mb-0">{SKULL_LABELS[k]}</Form.Label>
+                {SKULL_BILATERAL.includes(k) ? (
+                  <div className="d-flex gap-1">
+                    <div className="flex-fill">
+                      <div className="text-muted" style={{ fontSize: "0.7rem" }}>L</div>
+                      <CodeSelect field={`${k}_l`} placeholder="L" />
+                    </div>
+                    <div className="flex-fill">
+                      <div className="text-muted" style={{ fontSize: "0.7rem" }}>R</div>
+                      <CodeSelect field={`${k}_r`} placeholder="R" />
+                    </div>
+                  </div>
+                ) : (
+                  <CodeSelect field={k} />
+                )}
               </div>
             ))}
           </div>
-          {/* Cranial — bilateral */}
-          <div className="row g-2 mb-3">
-            {SKULL_BILATERAL.map(k => (
-              <div key={k} className="col-md-3 col-sm-6">
-                <Form.Label className="small mb-1">{SKULL_LABELS[k]}</Form.Label>
-                <div className="d-flex gap-1">
-                  <div className="flex-fill">
-                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>L</div>
-                    <CodeSelect field={`${k}_l`} placeholder="L" />
-                  </div>
-                  <div className="flex-fill">
-                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>R</div>
-                    <CodeSelect field={`${k}_r`} placeholder="R" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          </div></Collapse>
 
           {/* Axial */}
-          <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Axial</h6>
+          {skelHead("axial", "Axial")}
+          <Collapse in={!!skelOpen.axial}><div>
           <div className="row g-2 mb-3">
             {AXIAL_SINGLES.map(k => (
               <div key={k} className="col-md-2 col-sm-4">
@@ -702,9 +717,11 @@ const ModifyDonor = ({ create = false }) => {
               </div>
             ))}
           </div>
+          </div></Collapse>
 
           {/* Shoulder / Pelvis */}
-          <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Shoulder Girdle / Pelvis</h6>
+          {skelHead("girdle", "Shoulder Girdle / Pelvis")}
+          <Collapse in={!!skelOpen.girdle}><div>
           <div className="row g-2 mb-3">
             {GIRDLE_BILATERAL.map(k => (
               <div key={k} className="col-md-2 col-sm-4">
@@ -722,9 +739,11 @@ const ModifyDonor = ({ create = false }) => {
               </div>
             ))}
           </div>
+          </div></Collapse>
 
           {/* Long Bones */}
-          <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Long Bones</h6>
+          {skelHead("long", "Long Bones")}
+          <Collapse in={!!skelOpen.long}><div>
           <Table size="sm" bordered className="mb-3">
             <thead>
               <tr>
@@ -756,11 +775,13 @@ const ModifyDonor = ({ create = false }) => {
               ))}
             </tbody>
           </Table>
+          </div></Collapse>
 
           {/* Carpal / Tarsal */}
           <div className="row g-3 mb-3">
             <div className="col-md-6">
-              <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Carpal (Wrist) Bones</h6>
+              {skelHead("carpal", "Carpal (Wrist) Bones")}
+              <Collapse in={!!skelOpen.carpal}><div>
               {/* CSS columns so bones read top-to-bottom (Scaphoid→Pisiform | Hamate→Trapezium) per the form */}
               <div style={{ columnCount: 2, columnGap: "0.75rem" }}>
                 {CARPAL_BONES.map(k => (
@@ -779,9 +800,11 @@ const ModifyDonor = ({ create = false }) => {
                   </div>
                 ))}
               </div>
+              </div></Collapse>
             </div>
             <div className="col-md-6">
-              <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Tarsal (Foot) Bones</h6>
+              {skelHead("tarsal", "Tarsal (Foot) Bones")}
+              <Collapse in={!!skelOpen.tarsal}><div>
               {/* CSS columns so bones read top-to-bottom (Calcaneus→Cuboid | Cuneiform I→Patella) per the form */}
               <div style={{ columnCount: 2, columnGap: "0.75rem" }}>
                 {TARSAL_BONES.map(k => (
@@ -800,6 +823,7 @@ const ModifyDonor = ({ create = false }) => {
                   </div>
                 ))}
               </div>
+              </div></Collapse>
             </div>
           </div>
 
@@ -807,7 +831,8 @@ const ModifyDonor = ({ create = false }) => {
           <div className="row g-3 mb-3">
             {[["Metacarpals","mc"],["Metatarsals","mt"]].map(([label, prefix]) => (
               <div key={prefix} className="col-md-6">
-                <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">{label}</h6>
+                {skelHead(prefix, label)}
+                <Collapse in={!!skelOpen[prefix]}><div>
                 <Table size="sm" bordered>
                   <thead>
                     <tr>
@@ -836,12 +861,14 @@ const ModifyDonor = ({ create = false }) => {
                     ))}
                   </tbody>
                 </Table>
+                </div></Collapse>
               </div>
             ))}
           </div>
 
           {/* Phalanges */}
-          <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Phalanges (counts)</h6>
+          {skelHead("phalanges", "Phalanges (counts)")}
+          <Collapse in={!!skelOpen.phalanges}><div>
           <Table size="sm" bordered className="mb-3">
             <thead>
               <tr>
@@ -866,9 +893,11 @@ const ModifyDonor = ({ create = false }) => {
               ))}
             </tbody>
           </Table>
+          </div></Collapse>
 
           {/* Vertebrae */}
-          <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Vertebrae</h6>
+          {skelHead("vertebrae", "Vertebrae")}
+          <Collapse in={!!skelOpen.vertebrae}><div>
           {[
             { label: "Cervical", prefix: "c", count: "cervical_count", total: 7 },
             { label: "Thoracic", prefix: "t", count: "thoracic_count", total: 12 },
@@ -907,9 +936,11 @@ const ModifyDonor = ({ create = false }) => {
               <Form.Control size="sm" type="number" min={0} value={skeleton.coccyx_count ?? ""} onChange={e => handleSkeletonChange("coccyx_count", e.target.value)} />
             </div>
           </div>
+          </div></Collapse>
 
           {/* Ribs */}
-          <h6 className="text-uppercase text-muted border-bottom pb-1 mb-2">Ribs</h6>
+          {skelHead("ribs", "Ribs")}
+          <Collapse in={!!skelOpen.ribs}><div>
           <div className="d-flex align-items-center gap-2 mb-2">
             <span className="small fw-semibold">Total count:</span>
             <Form.Control size="sm" type="number" min={0} max={24} style={{ width: 80 }} placeholder="#" value={skeleton.ribs_count ?? ""} onChange={e => handleSkeletonChange("ribs_count", e.target.value)} />
@@ -938,12 +969,15 @@ const ModifyDonor = ({ create = false }) => {
               ))}
             </tbody>
           </Table>
+          </div></Collapse>
 
           {/* Comments */}
+          {skelHead("comments", "Comments / Notes")}
+          <Collapse in={!!skelOpen.comments}><div>
           <Form.Group>
-            <Form.Label className="small fw-semibold">Comments / Notes</Form.Label>
             <Form.Control as="textarea" rows={3} value={skeleton.comments ?? ""} onChange={e => handleSkeletonChange("comments", e.target.value)} />
           </Form.Group>
+          </div></Collapse>
         </Card.Body>
         </div></Collapse>
       </Card>

@@ -144,6 +144,8 @@ const codeDisplay = (v) => v ? (CODE_LABELS[v] ?? v) : "—";
 
 const SKULL_SINGLES   = ["frontal","occipital","ethmoid","vomer","sphenoid","mandible"];
 const SKULL_BILATERAL = ["parietal","temporal","zygomatic","palatine","maxilla","nasal","lacrimal"];
+// Skull bones in the SKELETAL form's column order (col 1 top→bottom, then col 2).
+const SKULL_ORDER     = ["frontal","occipital","parietal","temporal","zygomatic","palatine","mandible","maxilla","nasal","ethmoid","lacrimal","vomer","sphenoid"];
 const SKULL_LABELS    = { frontal:"Frontal", occipital:"Occipital", ethmoid:"Ethmoid", vomer:"Vomer", sphenoid:"Sphenoid", mandible:"Mandible", parietal:"Parietal", temporal:"Temporal", zygomatic:"Zygomatic", palatine:"Palatine", maxilla:"Maxilla", nasal:"Nasal", lacrimal:"Lacrimal" };
 // Sacrum & Coccyx are shown within the Vertebrae section (per the SKELETAL PDF).
 const AXIAL_SINGLES   = ["hyoid","manubrium","sternal_body","xiphoid"];
@@ -286,6 +288,23 @@ const DonorView = () => {
       </div>
     );
   };
+
+  // Collapsible subsection card for the Skeletal Inventory section.
+  const skelCard = (sk, title, content, bodyClassName = "py-2") => (
+    <Card className="mb-2" key={sk}>
+      <Card.Header
+        onClick={() => toggleGroup(`skel_${sk}`)}
+        style={{ cursor: "pointer", userSelect: "none" }}
+        className="py-2 fw-semibold small d-flex justify-content-between align-items-center"
+      >
+        <span>{title}</span>
+        <span className="text-muted">{openGroups[`skel_${sk}`] ? "▲" : "▼"}</span>
+      </Card.Header>
+      <Collapse in={!!openGroups[`skel_${sk}`]}>
+        <div><Card.Body className={bodyClassName}>{content}</Card.Body></div>
+      </Collapse>
+    </Card>
+  );
 
   // ---- Williams Analysis form ----------------------------------------------
   const williamsView = (
@@ -543,171 +562,131 @@ const DonorView = () => {
         <div>
           <p className="text-muted small mb-2 mt-1">Codes: 1=100% complete, 2=99–75%, 3=74–25%, 4=&lt;25%, 5=absent</p>
 
-          {/* Cranial */}
-          <Card className="mb-2">
-            <Card.Header className="py-2 fw-semibold small">Cranial</Card.Header>
-            <Card.Body className="py-2">
-              <Table size="sm" bordered className="mb-0">
-                <tbody>
-                  <tr>
-                    {SKULL_SINGLES.map(k => (
-                      <td key={k} className="text-center" style={{ minWidth: 80 }}>
-                        <div className="text-muted" style={{ fontSize: "0.7rem" }}>{SKULL_LABELS[k]}</div>
-                        <BoneCell val={skeleton[k]} />
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    {SKULL_BILATERAL.map(k => (
-                      <td key={k} className="text-center" style={{ minWidth: 80 }}>
-                        <div className="text-muted" style={{ fontSize: "0.7rem" }}>{SKULL_LABELS[k]}</div>
-                        <div className="small">L: <BoneCell val={skeleton[`${k}_l`]} /> / R: <BoneCell val={skeleton[`${k}_r`]} /></div>
-                      </td>
-                    ))}
-                  </tr>
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
+          {/* Cranial — CSS columns so bones read top-to-bottom per the SKELETAL form */}
+          {skelCard("cranial", "Cranial", (
+            <div style={{ columnCount: 2, columnGap: "0.75rem" }}>
+              {SKULL_ORDER.map(k => (
+                <div key={k} className="small mb-1" style={{ breakInside: "avoid" }}>
+                  <span className="text-muted">{SKULL_LABELS[k]}: </span>
+                  {SKULL_BILATERAL.includes(k)
+                    ? <>L:<BoneCell val={skeleton[`${k}_l`]} /> / R:<BoneCell val={skeleton[`${k}_r`]} /></>
+                    : <BoneCell val={skeleton[k]} />}
+                </div>
+              ))}
+            </div>
+          ))}
 
           {/* Axial */}
-          <Card className="mb-2">
-            <Card.Header className="py-2 fw-semibold small">Axial</Card.Header>
-            <Card.Body className="py-2">
-              <div className="d-flex flex-wrap gap-3">
-                {AXIAL_SINGLES.map(k => (
-                  <div key={k} className="text-center">
-                    <div className="text-muted small">{AXIAL_LABELS[k]}</div>
-                    <BoneCell val={skeleton[k]} />
-                  </div>
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
+          {skelCard("axial", "Axial", (
+            <div className="d-flex flex-wrap gap-3">
+              {AXIAL_SINGLES.map(k => (
+                <div key={k} className="text-center">
+                  <div className="text-muted small">{AXIAL_LABELS[k]}</div>
+                  <BoneCell val={skeleton[k]} />
+                </div>
+              ))}
+            </div>
+          ))}
 
           {/* Shoulder / Pelvis */}
-          <Card className="mb-2">
-            <Card.Header className="py-2 fw-semibold small">Shoulder Girdle / Pelvis</Card.Header>
-            <Card.Body className="py-2">
-              <div className="d-flex flex-wrap gap-3">
-                {GIRDLE_BILATERAL.map(k => (
-                  <div key={k} className="text-center">
-                    <div className="text-muted small">{GIRDLE_LABELS[k]}</div>
-                    <div className="small">L: <BoneCell val={skeleton[`${k}_l`]} /> / R: <BoneCell val={skeleton[`${k}_r`]} /></div>
+          {skelCard("girdle", "Shoulder Girdle / Pelvis", (
+            <div className="d-flex flex-wrap gap-3">
+              {GIRDLE_BILATERAL.map(k => (
+                <div key={k} className="text-center">
+                  <div className="text-muted small">{GIRDLE_LABELS[k]}</div>
+                  <div className="small">L: <BoneCell val={skeleton[`${k}_l`]} /> / R: <BoneCell val={skeleton[`${k}_r`]} /></div>
+                </div>
+              ))}
+            </div>
+          ))}
+
+          {/* Long Bones */}
+          {skelCard("long", "Long Bones", (
+            <Table size="sm" bordered className="mb-0">
+              <thead>
+                <tr>
+                  <th rowSpan={2}>Bone</th>
+                  <th colSpan={3} className="text-center small">Left</th>
+                  <th colSpan={3} className="text-center small">Right</th>
+                </tr>
+                <tr>
+                  {["Overall","Prox.","Dist.","Overall","Prox.","Dist."].map((h,i) => (
+                    <th key={i} className="small text-muted text-center">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {LONG_BONES.map(b => (
+                  <tr key={b}>
+                    <td className="small fw-semibold">{LONG_LABELS[b]}</td>
+                    {["l","r"].map(side =>
+                      ["", "_prox", "_dist"].map(suffix => (
+                        <td key={`${side}${suffix}`} className="text-center small">
+                          <BoneCell val={skeleton[`${b}_${side}${suffix}`]} />
+                        </td>
+                      ))
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          ), "p-0")}
+
+          {/* Carpal / Tarsal */}
+          {[[CARPAL_BONES, CARPAL_LABELS, "Carpal (Wrist) Bones", "carpal"], [TARSAL_BONES, TARSAL_LABELS, "Tarsal (Foot) Bones", "tarsal"]].map(([bones, labels, title, sk]) => (
+            skelCard(sk, title, (
+              /* CSS columns so bones read top-to-bottom (per the SKELETAL form) */
+              <div style={{ columnCount: 2, columnGap: "0.75rem" }}>
+                {bones.map(k => (
+                  <div key={k} className="small mb-1" style={{ breakInside: "avoid" }}>
+                    <span className="text-muted">{labels[k]}: </span>
+                    L:<BoneCell val={skeleton[`${k}_l`]} /> / R:<BoneCell val={skeleton[`${k}_r`]} />
                   </div>
                 ))}
               </div>
-            </Card.Body>
-          </Card>
-
-          {/* Long Bones */}
-          <Card className="mb-2">
-            <Card.Header className="py-2 fw-semibold small">Long Bones</Card.Header>
-            <Card.Body className="p-0">
-              <Table size="sm" bordered className="mb-0">
-                <thead>
-                  <tr>
-                    <th rowSpan={2}>Bone</th>
-                    <th colSpan={3} className="text-center small">Left</th>
-                    <th colSpan={3} className="text-center small">Right</th>
-                  </tr>
-                  <tr>
-                    {["Overall","Prox.","Dist.","Overall","Prox.","Dist."].map((h,i) => (
-                      <th key={i} className="small text-muted text-center">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {LONG_BONES.map(b => (
-                    <tr key={b}>
-                      <td className="small fw-semibold">{LONG_LABELS[b]}</td>
-                      {["l","r"].map(side =>
-                        ["", "_prox", "_dist"].map(suffix => (
-                          <td key={`${side}${suffix}`} className="text-center small">
-                            <BoneCell val={skeleton[`${b}_${side}${suffix}`]} />
-                          </td>
-                        ))
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-
-          {/* Carpal / Tarsal */}
-          <div className="row g-2 mb-2">
-            {[[CARPAL_BONES, CARPAL_LABELS, "Carpal (Wrist) Bones"], [TARSAL_BONES, TARSAL_LABELS, "Tarsal (Foot) Bones"]].map(([bones, labels, title]) => (
-              <div key={title} className="col-md-6">
-                <Card>
-                  <Card.Header className="py-2 fw-semibold small">{title}</Card.Header>
-                  <Card.Body className="py-2">
-                    {/* CSS columns so bones read top-to-bottom (per the SKELETAL form) */}
-                    <div style={{ columnCount: 2, columnGap: "0.75rem" }}>
-                      {bones.map(k => (
-                        <div key={k} className="small mb-1" style={{ breakInside: "avoid" }}>
-                          <span className="text-muted">{labels[k]}: </span>
-                          L:<BoneCell val={skeleton[`${k}_l`]} /> / R:<BoneCell val={skeleton[`${k}_r`]} />
-                        </div>
-                      ))}
-                    </div>
-                  </Card.Body>
-                </Card>
-              </div>
-            ))}
-          </div>
+            ))
+          ))}
 
           {/* Metacarpals / Metatarsals */}
-          <div className="row g-2 mb-2">
-            {[["Metacarpals","mc"],["Metatarsals","mt"]].map(([label, prefix]) => (
-              <div key={prefix} className="col-md-6">
-                <Card>
-                  <Card.Header className="py-2 fw-semibold small">{label}</Card.Header>
-                  <Card.Body className="py-2">
-                    <Table size="sm" bordered className="mb-0">
-                      <thead><tr><th></th><th className="text-center small">Left</th><th className="text-center small">Right</th></tr></thead>
-                      <tbody>
-                        {[1,2,3,4,5].map(i => (
-                          <tr key={i}>
-                            <td className="small fw-semibold">{prefix.toUpperCase()}{i}</td>
-                            <td className="text-center small"><BoneCell val={skeleton[`${prefix}${i}_l`]} /></td>
-                            <td className="text-center small"><BoneCell val={skeleton[`${prefix}${i}_r`]} /></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </Card.Body>
-                </Card>
-              </div>
-            ))}
-          </div>
-
-          {/* Phalanges */}
-          <Card className="mb-2">
-            <Card.Header className="py-2 fw-semibold small">Phalanges (counts)</Card.Header>
-            <Card.Body className="p-0">
+          {[["Metacarpals","mc"],["Metatarsals","mt"]].map(([label, prefix]) => (
+            skelCard(prefix, label, (
               <Table size="sm" bordered className="mb-0">
-                <thead><tr><th>Hand</th><th className="text-center small">L</th><th className="text-center small">R</th><th>Foot</th><th className="text-center small">L</th><th className="text-center small">R</th></tr></thead>
+                <thead><tr><th></th><th className="text-center small">Left</th><th className="text-center small">Right</th></tr></thead>
                 <tbody>
-                  {[["Proximal","hand_prox","foot_prox"],["Middle","hand_middle","foot_middle"],["Distal","hand_distal","foot_distal"]].map(([lbl, hk, fk]) => (
-                    <tr key={hk}>
-                      <td className="small fw-semibold">{lbl}</td>
-                      <td className="text-center small">{skeleton[`${hk}_l`] || "—"}</td>
-                      <td className="text-center small">{skeleton[`${hk}_r`] || "—"}</td>
-                      <td className="small fw-semibold">{lbl}</td>
-                      <td className="text-center small">{skeleton[`${fk}_l`] || "—"}</td>
-                      <td className="text-center small">{skeleton[`${fk}_r`] || "—"}</td>
+                  {[1,2,3,4,5].map(i => (
+                    <tr key={i}>
+                      <td className="small fw-semibold">{prefix.toUpperCase()}{i}</td>
+                      <td className="text-center small"><BoneCell val={skeleton[`${prefix}${i}_l`]} /></td>
+                      <td className="text-center small"><BoneCell val={skeleton[`${prefix}${i}_r`]} /></td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
-            </Card.Body>
-          </Card>
+            ), "p-0")
+          ))}
+
+          {/* Phalanges */}
+          {skelCard("phalanges", "Phalanges (counts)", (
+            <Table size="sm" bordered className="mb-0">
+              <thead><tr><th>Hand</th><th className="text-center small">L</th><th className="text-center small">R</th><th>Foot</th><th className="text-center small">L</th><th className="text-center small">R</th></tr></thead>
+              <tbody>
+                {[["Proximal","hand_prox","foot_prox"],["Middle","hand_middle","foot_middle"],["Distal","hand_distal","foot_distal"]].map(([lbl, hk, fk]) => (
+                  <tr key={hk}>
+                    <td className="small fw-semibold">{lbl}</td>
+                    <td className="text-center small">{skeleton[`${hk}_l`] || "—"}</td>
+                    <td className="text-center small">{skeleton[`${hk}_r`] || "—"}</td>
+                    <td className="small fw-semibold">{lbl}</td>
+                    <td className="text-center small">{skeleton[`${fk}_l`] || "—"}</td>
+                    <td className="text-center small">{skeleton[`${fk}_r`] || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          ), "p-0")}
 
           {/* Vertebrae */}
-          <Card className="mb-2">
-            <Card.Header className="py-2 fw-semibold small">Vertebrae</Card.Header>
-            <Card.Body className="py-2">
+          {skelCard("vertebrae", "Vertebrae", (
+            <>
               {[
                 { label: "Cervical", prefix: "c", count: "cervical_count", total: 7 },
                 { label: "Thoracic", prefix: "t", count: "thoracic_count", total: 12 },
@@ -737,39 +716,31 @@ const DonorView = () => {
                   {skeleton.coccyx_count && <span className="text-muted small ms-1">(#{skeleton.coccyx_count})</span>}
                 </div>
               </div>
-            </Card.Body>
-          </Card>
+            </>
+          ))}
 
           {/* Ribs */}
-          <Card className="mb-2">
-            <Card.Header className="py-2 fw-semibold small">
-              Ribs {skeleton.ribs_count && <span className="text-muted fw-normal">(count: {skeleton.ribs_count})</span>}
-            </Card.Header>
-            <Card.Body className="p-0">
-              <Table size="sm" bordered className="mb-0">
-                <thead><tr><th>Rib</th><th className="text-center small">Left</th><th className="text-center small">Right</th><th>Rib</th><th className="text-center small">Left</th><th className="text-center small">Right</th></tr></thead>
-                <tbody>
-                  {[1,2,3,4,5,6].map(i => (
-                    <tr key={i}>
-                      <td className="small fw-semibold">R{i}</td>
-                      <td className="text-center small"><BoneCell val={skeleton[`rib${i}_l`]} /></td>
-                      <td className="text-center small"><BoneCell val={skeleton[`rib${i}_r`]} /></td>
-                      <td className="small fw-semibold">R{i+6}</td>
-                      <td className="text-center small"><BoneCell val={skeleton[`rib${i+6}_l`]} /></td>
-                      <td className="text-center small"><BoneCell val={skeleton[`rib${i+6}_r`]} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
+          {skelCard("ribs", <>Ribs {skeleton.ribs_count && <span className="text-muted fw-normal">(count: {skeleton.ribs_count})</span>}</>, (
+            <Table size="sm" bordered className="mb-0">
+              <thead><tr><th>Rib</th><th className="text-center small">Left</th><th className="text-center small">Right</th><th>Rib</th><th className="text-center small">Left</th><th className="text-center small">Right</th></tr></thead>
+              <tbody>
+                {[1,2,3,4,5,6].map(i => (
+                  <tr key={i}>
+                    <td className="small fw-semibold">R{i}</td>
+                    <td className="text-center small"><BoneCell val={skeleton[`rib${i}_l`]} /></td>
+                    <td className="text-center small"><BoneCell val={skeleton[`rib${i}_r`]} /></td>
+                    <td className="small fw-semibold">R{i+6}</td>
+                    <td className="text-center small"><BoneCell val={skeleton[`rib${i+6}_l`]} /></td>
+                    <td className="text-center small"><BoneCell val={skeleton[`rib${i+6}_r`]} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          ), "p-0")}
 
-          {skeleton.comments && (
-            <Card className="mb-2">
-              <Card.Header className="py-2 fw-semibold small">Comments / Notes</Card.Header>
-              <Card.Body className="py-2" style={{ whiteSpace: "pre-wrap" }}>{skeleton.comments}</Card.Body>
-            </Card>
-          )}
+          {skeleton.comments && skelCard("comments", "Comments / Notes", (
+            <span style={{ whiteSpace: "pre-wrap" }}>{skeleton.comments}</span>
+          ))}
         </div>
         </Collapse>
       </div>

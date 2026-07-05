@@ -657,16 +657,20 @@ const ModifyDonor = ({ create = false }) => {
               </div>
             ))}
           </div>
-          <div className="small text-muted mb-1">Lower (teeth 17–32, left → right)</div>
+          {/* Lower jaw runs 32 → 17 left-to-right, matching the SKELETAL form. */}
+          <div className="small text-muted mb-1">Lower (teeth 32–17, left → right)</div>
           <div className="d-flex flex-wrap gap-1">
-            {Array.from({ length: 16 }, (_, i) => (
-              <div key={i + 16} className="text-center" style={{ minWidth: 48 }}>
-                <div className="small text-muted">{i + 17}</div>
-                <Form.Select size="sm" value={teeth[i + 16]} onChange={e => handleDentitionChange(i + 16, e.target.value)}>
-                  {["N","A","P","D"].map(c => <option key={c} value={c}>{c}</option>)}
-                </Form.Select>
-              </div>
-            ))}
+            {Array.from({ length: 16 }, (_, j) => {
+              const idx = 31 - j; // teeth index; tooth number = idx + 1 (32 → 17)
+              return (
+                <div key={idx} className="text-center" style={{ minWidth: 48 }}>
+                  <div className="small text-muted">{idx + 1}</div>
+                  <Form.Select size="sm" value={teeth[idx]} onChange={e => handleDentitionChange(idx, e.target.value)}>
+                    {["N","A","P","D"].map(c => <option key={c} value={c}>{c}</option>)}
+                  </Form.Select>
+                </div>
+              );
+            })}
           </div>
         </Card.Body>
         </div></Collapse>

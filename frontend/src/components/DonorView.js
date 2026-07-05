@@ -529,17 +529,21 @@ const DonorView = () => {
             </Card.Body>
           </Card>
           <Card>
-            <Card.Header className="py-2 small fw-semibold">Lower jaw (teeth 17–32)</Card.Header>
+            <Card.Header className="py-2 small fw-semibold">Lower jaw (teeth 32–17)</Card.Header>
             <Card.Body className="py-2">
+              {/* Lower jaw runs 32 → 17 left-to-right, matching the SKELETAL form. */}
               <div className="d-flex flex-wrap gap-2">
-                {Array.from({ length: 16 }, (_, i) => (
-                  <div key={i + 16} className="text-center" style={{ minWidth: 40 }}>
-                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>{i + 17}</div>
-                    <Badge bg={teeth[i+16] === "N" ? "light" : teeth[i+16] === "A" ? "danger" : teeth[i+16] === "P" ? "warning" : "info"} text={teeth[i+16] === "N" ? "dark" : undefined}>
-                      {teeth[i + 16]}
-                    </Badge>
-                  </div>
-                ))}
+                {Array.from({ length: 16 }, (_, j) => {
+                  const idx = 31 - j;
+                  return (
+                    <div key={idx} className="text-center" style={{ minWidth: 40 }}>
+                      <div className="text-muted" style={{ fontSize: "0.7rem" }}>{idx + 1}</div>
+                      <Badge bg={teeth[idx] === "N" ? "light" : teeth[idx] === "A" ? "danger" : teeth[idx] === "P" ? "warning" : "info"} text={teeth[idx] === "N" ? "dark" : undefined}>
+                        {teeth[idx]}
+                      </Badge>
+                    </div>
+                  );
+                })}
               </div>
             </Card.Body>
           </Card>

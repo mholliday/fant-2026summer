@@ -12,22 +12,22 @@ const path = require("path");
 const {
   ANALYSIS_FIELDS,
   ELEMENT_GROUPS,
-  absentBoneIds,
   OSTEOMETRY_FIELDS,
   elemKey,
 } = require("./williamsData");
 
-// Public-domain anatomical skeleton (LadyofHats, Wikimedia Commons). Loaded
-// once; absent bones are recoloured via an injected <style> per donor.
-const SKELETON_SVG = (() => {
+// The two skeletal figures shown on the Williams page (each front + back view).
+// Loaded once and inlined as base64 data URIs so they render in the PDF without
+// depending on a base URL.
+const loadImg = (file) => {
   try {
-    return fs.readFileSync(path.join(__dirname, "..", "assets", "skeleton.svg"), "utf8")
-      .replace(/<\?xml[\s\S]*?\?>/, "")
-      .replace(/<!DOCTYPE[\s\S]*?>/, "");
+    return `data:image/png;base64,${fs.readFileSync(path.join(__dirname, "..", "assets", file)).toString("base64")}`;
   } catch {
     return "";
   }
-})();
+};
+const SKELETAL_HOMUNCULUS_IMG = loadImg("skeletal_inventory_homunculus.png");
+const TRAUMA_HOMUNCULUS_IMG = loadImg("trauma_homunculus.png");
 
 // --- Flat skeletal-inventory schema (mirrors the UI) ----------------------
 const SKULL_SINGLES = [["frontal","Frontal"],["occipital","Occipital"],["ethmoid","Ethmoid"],["vomer","Vomer"],["sphenoid","Sphenoid"],["mandible","Mandible"]];
@@ -98,16 +98,6 @@ const generateHtml = (donor) => {
     return `<table class="inv"><tr><th class="lbl">${esc(group.label)}</th><th class="num">P/A</th><th>Observations</th></tr>${body}</table>`;
   }).join("");
 
-  // ---- Anatomical skeleton figure with absent bones reddened ----
-  const absentIds = absentBoneIds(inventory);
-  const homunculusStyle = absentIds
-    .map((id) => `.homunculus #${id}, .homunculus #${id} * { fill: #c0392b !important; stroke: #7b241c !important; }`)
-    .join("\n");
-  const homunculus = SKELETON_SVG
-    ? `<style>.homunculus svg { max-height: 540px; width: auto; } ${homunculusStyle}</style>
-       <div class="homunculus">${SKELETON_SVG}</div>`
-    : "";
-
   // ---- Osteometry table ----
   const osteometryTables = Object.entries(OSTEOMETRY_FIELDS).map(([group, fields]) => {
     const body = fields.map(([k, label]) =>
@@ -175,7 +165,7 @@ const generateHtml = (donor) => {
   <p class="subhead">Dentition <span style="font-weight:normal">(A=antemortem, P=postmortem, N=natural, D=dental work)</span></p>
   <table>
     <tr><td class="lbl">Upper (1–16)</td>${teeth.slice(0,16).map(t=>`<td class="num">${code(t)}</td>`).join("")}</tr>
-    <tr><td class="lbl">Lower (17–32)</td>${teeth.slice(16,32).map(t=>`<td class="num">${code(t)}</td>`).join("")}</tr>
+    <tr><td class="lbl">Lower (32–17)</td>${teeth.slice(16,32).reverse().map(t=>`<td class="num">${code(t)}</td>`).join("")}</tr>
   </table>
 
   <h3>Skeletal Inventory <span style="font-size:7px;font-weight:normal">(1=100% · 2=99–75% · 3=74–25% · 4=&lt;25% · 5=absent)</span></h3>
@@ -219,26 +209,22 @@ const generateHtml = (donor) => {
 
   ${hasAnalysis ? `<h3>Analysis</h3><table>${analysisRows}</table>` : ""}
 
-  <h3>Element Inventory &amp; Homunculus</h3>
-  <table style="border:none"><tr style="border:none">
-    <td style="border:none;width:200px">
-      ${homunculus}
-      <div class="legend"><span style="background:#5b3f8c"></span> Present &nbsp; <span style="background:#e9ecef"></span> Absent</div>
-    </td>
-    <td style="border:none">
-      <div class="inv-wrap">${inventoryGroups}</div>
-    </td>
-  </tr></table>
+  <h3>Element Inventory</h3>
+  <div class="inv-wrap">${inventoryGroups}</div>
+  ${SKELETAL_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${SKELETAL_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
+
+  ${notes.general_observations ? `<p class="subhead">General Observations</p><div class="box">${esc(notes.general_observations)}</div>` : ""}
 
   <div class="pagebreak"></div>
   <h3>Osteometry <span style="font-size:7px;font-weight:normal">(mm)</span></h3>
   <div>${osteometryTables}</div>
 
-  ${notes.general_observations || notes.trauma_and_pathological_analysis
-    ? `<h3>Notes</h3>
-       ${notes.general_observations ? `<p class="subhead">General Observations</p><div class="box">${esc(notes.general_observations)}</div>` : ""}
-       ${notes.trauma_and_pathological_analysis ? `<p class="subhead">Trauma &amp; Pathological Analysis</p><div class="box">${esc(notes.trauma_and_pathological_analysis)}</div>` : ""}`
-    : ""}
+  ${notes.trauma_and_pathological_analysis ? `<p class="subhead">Trauma and Pathological Analysis</p><div class="box">${esc(notes.trauma_and_pathological_analysis)}</div>` : ""}
+  ${notes.general_observations_2 ? `<p class="subhead">General Observations</p><div class="box">${esc(notes.general_observations_2)}</div>` : ""}
+
+  ${TRAUMA_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${TRAUMA_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
+
+  ${notes.continuation ? `<p class="subhead">Continuation to Skeletal Analysis</p><div class="box">${esc(notes.continuation)}</div>` : ""}
 
 </div>
 </body>

@@ -795,11 +795,11 @@ const DonorView = () => {
       <div className="mb-3">
         <h5>Reference Forms</h5>
         <Stack direction="horizontal" gap={2}>
-          <Button size="sm" variant="outline-secondary" href={`${refBase}skeletal-inventory.pdf`} target="_blank" rel="noreferrer">
-            SKELETAL INVENTORY.pdf
-          </Button>
           <Button size="sm" variant="outline-secondary" href={`${refBase}williams-collection-forms.docx`} target="_blank" rel="noreferrer">
             Williams Collection Forms (.docx)
+          </Button>
+          <Button size="sm" variant="outline-secondary" href={`${refBase}skeletal-inventory.pdf`} target="_blank" rel="noreferrer">
+            SKELETAL INVENTORY.pdf
           </Button>
         </Stack>
       </div>

@@ -1,0 +1,18 @@
+Donor inventory page
+
+You have not been following the order of the two input files. To ensure that you do the right thing I want there to be two separate pages, one based on the John Williams input file and one based on the SKELETAL input file.
+
+1) The date is missing from the Identification section (which is supposed to be like the start of the SKELELTAL INVENTORY.pdf).
+
+2) The John Williams page has both the front and back facing skeletons and a General Observations large textbox twice. Once after the first section table (that has columns Element, Absent, and Other Observations). Once after the Osteometry section. Also, after the Osteometry section there is a Trauma and Pathological Analysis large textbox and the title of the two skeletons is different. The application only has one skeleton, not four, and just the front facing and only has one General Observation text field and no Trauma and Pathological text field.
+
+3) The section named Analysis Williams Collection lab form header has a CIL field which does not exist anywhere in the input files and is not explained.
+
+4) Your section named Element Inventory is like the first section of the John Williams input file but the Right Arm subsection is after the Left Arm subsection but it should be after the Right Leg subsection. 
+
+5) All the John Williams based sections should be together and before the SKELETAL INVENTORY file based sections. Within each of those two parts the order of the subsections should be the same as they are in the input files. 
+In fact there should be two pages one for the John Williams sections and one for the SKELETAL INVENTORY sections. 
+In the Osteometry section you are not following the required order of the individual items that is in the input file.
+
+6) In the Skeletal Inventory section the order of the items is mixed up and not like the required order in the input file. The header information from the SKELETAL input file is missing. It needs to be at the start of the page that is just for that input file.
+

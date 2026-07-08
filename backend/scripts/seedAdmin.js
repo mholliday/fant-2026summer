@@ -22,17 +22,15 @@ const User = require("../models/User");
 
 const SUPER_ADMIN_ACCESS = 15;
 
-async function seedAdmin() {
-  const uri = process.env.BONES_DB_URI;
+/**
+ * Ensure the admin user exists. Assumes a Mongoose connection is already open.
+ * Skips silently if ADMIN_USERNAME or ADMIN_PASSWORD are not set.
+ */
+async function ensureAdmin() {
   const username = process.env.ADMIN_USERNAME;
   const password = process.env.ADMIN_PASSWORD;
 
-  if (!uri) throw new Error("BONES_DB_URI is not set");
-  if (!username || !password) {
-    throw new Error("ADMIN_USERNAME and ADMIN_PASSWORD must be set");
-  }
-
-  await mongoose.connect(uri);
+  if (!username || !password) return;
 
   const existing = await User.findOne({ username });
   if (existing) {
@@ -54,10 +52,21 @@ async function seedAdmin() {
   console.log("Change this password after first login.");
 }
 
-seedAdmin()
-  .then(() => mongoose.disconnect())
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.error("Seed failed:", err.message);
-    mongoose.disconnect().finally(() => process.exit(1));
-  });
+module.exports = { ensureAdmin };
+
+if (require.main === module) {
+  const uri = process.env.BONES_DB_URI;
+  if (!uri) {
+    console.error("BONES_DB_URI is not set");
+    process.exit(1);
+  }
+  mongoose
+    .connect(uri)
+    .then(() => ensureAdmin())
+    .then(() => mongoose.disconnect())
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error("Seed failed:", err.message);
+      mongoose.disconnect().finally(() => process.exit(1));
+    });
+}

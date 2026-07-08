@@ -9,6 +9,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 
+const { ensureAdmin } = require("./scripts/seedAdmin");
 const { logger } = require("./middleware/logger");
 const errorHandler = require("./middleware/errorHandler");
 const corsOptions = require("./config/corsOptions");
@@ -41,8 +42,9 @@ app.use(errorHandler);
 // Connect to MongoDB via Mongoose - no deprecated options needed in Mongoose 7+
 mongoose
   .connect(process.env.BONES_DB_URI)
-  .then(() => {
+  .then(async () => {
     console.log("Connected to MongoDB");
+    await ensureAdmin();
     app.listen(port, () => {
       console.log(`Listening on port ${port}...`);
     });

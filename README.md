@@ -198,7 +198,7 @@ docker-compose up --build
 ### Backend (`.env`)
 | Variable | Description |
 |----------|-------------|
-| `BONES_DB_URI` | MongoDB connection URI |
+| `FANT_DB_URI` | MongoDB connection URI |
 | `ACCESS_TOKEN_SECRET` | Secret for signing access JWTs |
 | `REFRESH_TOKEN_SECRET` | Secret for signing refresh JWTs |
 | `PORT` | Server port (default: 8000) |

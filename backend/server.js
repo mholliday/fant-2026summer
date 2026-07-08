@@ -41,7 +41,7 @@ app.use(errorHandler);
 
 // Connect to MongoDB via Mongoose - no deprecated options needed in Mongoose 7+
 mongoose
-  .connect(process.env.BONES_DB_URI)
+  .connect(process.env.FANT_DB_URI)
   .then(async () => {
     console.log("Connected to MongoDB");
     await ensureAdmin();

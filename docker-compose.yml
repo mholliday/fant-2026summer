@@ -7,7 +7,7 @@ services:
       - ./backend/.env
     environment:
       # Override .env's localhost so the container reaches the mongo service
-      - BONES_DB_URI=mongodb://mongo:27017/fant
+      - FANT_DB_URI=mongodb://mongo:27017/fant
     depends_on:
       - mongo
     networks:

@@ -10,7 +10,7 @@
  *   npm run seed:admin            (from backend/, uses .env)
  *   docker compose exec backend npm run seed:admin
  *
- * Reads ADMIN_USERNAME / ADMIN_PASSWORD and BONES_DB_URI from the env.
+ * Reads ADMIN_USERNAME / ADMIN_PASSWORD and FANT_DB_URI from the env.
  * Idempotent: does nothing if the username already exists.
  */
 require("dotenv").config();
@@ -55,9 +55,9 @@ async function ensureAdmin() {
 module.exports = { ensureAdmin };
 
 if (require.main === module) {
-  const uri = process.env.BONES_DB_URI;
+  const uri = process.env.FANT_DB_URI;
   if (!uri) {
-    console.error("BONES_DB_URI is not set");
+    console.error("FANT_DB_URI is not set");
     process.exit(1);
   }
   mongoose

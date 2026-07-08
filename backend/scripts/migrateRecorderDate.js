@@ -23,11 +23,11 @@ const FIELDS = ["recorder", "date"];
 const nonEmpty = (v) => typeof v === "string" && v.trim() !== "";
 
 async function main() {
-  if (!process.env.BONES_DB_URI) {
-    throw new Error("BONES_DB_URI is not set (check backend/.env)");
+  if (!process.env.FANT_DB_URI) {
+    throw new Error("FANT_DB_URI is not set (check backend/.env)");
   }
 
-  await mongoose.connect(process.env.BONES_DB_URI);
+  await mongoose.connect(process.env.FANT_DB_URI);
   console.log(`Connected. ${DRY_RUN ? "(DRY RUN — no writes)" : ""}`);
 
   const cursor = Version.find({}).cursor();

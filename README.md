@@ -10,7 +10,7 @@ A modernized rebuild of the BonesDB cadaver tracking application for the Forensi
 |-----------|--------|-------|
 | MongoDB driver | `mongodb` (raw driver, manual `injectDB`) | `mongoose` 8.x (ODM with schemas) |
 | Node | Any | 20 LTS |
-| React | 18 (CRA) | 18 (CRA, unchanged) |
+| React | 18 (CRA) | 18 (Vite) |
 | JWT refresh token lookup | By username | By userID (more reliable) |
 | Docker base image | Not specified | `node:20-alpine` / `nginx:alpine` |
 
@@ -65,7 +65,7 @@ A modernized rebuild of the BonesDB cadaver tracking application for the Forensi
 - **`signup()` argument order mismatch** — `AppContext.js` calls `auth.signup(firstName, lastName, username, password, access)` but the original `AuthService.signup()` signature was `(username, password, firstName, lastName, access)`. First name and last name would be sent as username/password and vice versa. Fixed the method signature to match the call site.
 
 #### `contexts/AppContext.js`
-- **Hardcoded `localhost:5000`** — The API base URL was hardcoded to `http://localhost:5000/api/v2/`. The backend runs on port 8000. This made every API call fail out of the box unless the developer manually patched the file. Changed to read `process.env.REACT_APP_API_URL` with a fallback of `/api/v2/` (which works with CRA's proxy).
+- **Hardcoded `localhost:5000`** — The API base URL was hardcoded to `http://localhost:5000/api/v2/`. The backend runs on port 8000. This made every API call fail out of the box unless the developer manually patched the file. Changed to read `import.meta.env.VITE_API_URL` with a fallback of `/api/v2/` (which works with Vite's proxy).
 
 #### `components/Login.js`
 - **Unused `redirect` import** — `redirect` was imported from `react-router-dom` but never used. Removed.
@@ -77,9 +77,14 @@ A modernized rebuild of the BonesDB cadaver tracking application for the Forensi
 ```
 bones-db-v2/
 ├── backend/
+│   ├── assets/
+│   │   ├── skeletal_inventory_homunculus.png
+│   │   ├── skeleton.svg
+│   │   └── trauma_homunculus.png
 │   ├── config/
 │   │   └── corsOptions.js
 │   ├── controllers/
+│   │   ├── adminController.js
 │   │   ├── authController.js
 │   │   ├── donorController.js
 │   │   └── userController.js
@@ -96,21 +101,27 @@ bones-db-v2/
 │   │   ├── donorDAO.js
 │   │   ├── userDAO.js
 │   │   └── versionDAO.js
+│   ├── reference/
+│   │   ├── skeletal-inventory.pdf
+│   │   └── williams-collection-forms.docx
 │   ├── routes/
+│   │   ├── adminRoutes.js
 │   │   ├── authRoutes.js
 │   │   ├── donorRoutes.js
 │   │   └── userRoutes.js
+│   ├── scripts/
+│   │   ├── migrateRecorderDate.js
+│   │   └── seedAdmin.js
 │   ├── utilities/
 │   │   ├── htmlTemplate.js
 │   │   ├── passwordChecking.js
-│   │   └── permissions.js
+│   │   ├── permissions.js
+│   │   └── williamsData.js
 │   ├── .env.example
 │   ├── Dockerfile
 │   ├── package.json
 │   └── server.js
 ├── frontend/
-│   ├── public/
-│   │   └── index.html
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── misc/          (ErrorHandling, NotFound)
@@ -118,6 +129,7 @@ bones-db-v2/
 │   │   │   ├── AdminPanel.js
 │   │   │   ├── Dashboard.js
 │   │   │   ├── DonorView.js
+│   │   │   ├── Homunculus.js
 │   │   │   ├── Landing.js
 │   │   │   ├── Login.js
 │   │   │   ├── ModifyDonor.js
@@ -126,17 +138,21 @@ bones-db-v2/
 │   │   ├── contexts/
 │   │   │   └── AppContext.js
 │   │   ├── services/
+│   │   │   ├── adminDataService.js
 │   │   │   ├── authDataService.js
 │   │   │   ├── authService.js
 │   │   │   ├── axiosConfig.js
 │   │   │   ├── donorDataService.js
-│   │   │   └── userDataService.js
+│   │   │   ├── userDataService.js
+│   │   │   └── williamsForm.js
 │   │   ├── utilities/
 │   │   │   └── permissions.js
 │   │   ├── App.js
-│   │   └── index.js
+│   │   └── main.jsx
 │   ├── .env.example
 │   ├── Dockerfile
+│   ├── index.html
+│   ├── nginx.conf
 │   └── package.json
 └── docker-compose.yml
 ```

@@ -1,0 +1,89 @@
+The typical workflow is:
+1. Start Docker Desktop on Windows (it runs in the system tray)
+2. Open a WSL terminal. Click on it to make it the active window.
+3. Enter command below to start FANT
+
+docker compose up
+
+4. In Windows open a browser and enter
+
+localhost:3000
+
+to go to the main page of FANT.
+
+5. Login as a user. The only original user is 
+
+username: admin              password: Admin@123!
+
+Passwords must be at least 8 characters and include a lowercase character, an uppercase character,
+a digit, and a special symbol.
+
+5. You can let FANT run indefinitely, but when you restart the computer you must do the above steps.  
+
+
+
+
+
+Additional Notes
+1. Docker Desktop on Windows is what provides the Docker engine that WSL uses under the hood. If Docker Desktop isn't running, the `docker` command in WSL won't work.
+
+2. Docker handles everything (backend, frontend, MongoDB). The frontend `.env` isn't needed since the compose file sets the env var directly. Since you already have `backend/.env`, you just need to run 
+
+docker compose up
+
+3. The 
+
+docker compose up 
+
+command causes all three containers to come up.
+
+4. The first time running the application after writing it and after code changes you need to use
+
+docker compose up --build
+
+That is, you need to add the --build flag.
+
+5. If you want to run FANT in the background in the terminal use the following command to start it
+
+docker compose up -d
+
+6. If you want to stop FANT for some reason, the easiest way is from the Docker Desktop.
+- Click on the Docker Desktop icon (a whale) in the system tray.
+- In the resulting window in the left pane click the Containers list item.
+- The fant container will be shown as running. 
+- On the right side click the blue square under Actions to stop FANT. 
+- The blue square icon turns into a blue arrow. 
+- Click the blue arrow to restart FANT.
+
+7. You can stop the application within the WSL terminal by doing 
+
+Enter 
+
+Ctrl+C
+
+which stops the application but leaves the containers intact.
+If you want to remove the containers after stopping them, then follow by entering 
+
+docker compose down
+
+8. The initial installation of the entire system is done by.
+a) Installing WSL on the Windows 11 machine by
+    1. Open PowerShell or Command Prompt as Administrator (right-click-> "Run as administrator")
+    2. Run the single command
+
+wsl --install
+
+    3. Restart the computer when prompted
+    4. After restart, a terminal window should open to automatically finish the setup. It will ask you to create a username and password for the Linux distribution (the default distribution is Ubuntu)
+
+b) Install Docker Desktop in the Windows environment
+    1. In Windows open a browser and google "Installing Docker Desktop". You will reach a Downloads page to download the version you want. 
+    2. Once the .exe file is downloaded, double click on it in File Explorer to start the installation. Choose the all-users installation and click the box saying "Use WSL 2 instead of Hyper-V"
+    3. You will need to enter you Windows admin username and password which are your normal WCU credentials.
+    4. Restart Windows when prompted.
+    5. The Docker Desktop shortcut appears on the Windows desktop. Double click it to start docker. Go to Settings (gear icon on top right) --> Resources --> WSL Integration. Toggle on "Enable integration with my default WSL distro". Click Apply & Restart. Back in your WSL terminal, close and reopen it (or run `exec bash`) and try the command `docker --version`.
+
+
+
+
+

@@ -1,6 +1,6 @@
-# BonesDB v2
+# FANT
 
-A modernized rebuild of the BonesDB cadaver tracking application for the Forensic Osteology Research Station (FOREST) at Western Carolina University.
+A modernized rebuild of the FANT cadaver tracking application for the Forensic Osteology Research Station (FOREST) at Western Carolina University.
 
 ## What Changed
 
@@ -75,7 +75,7 @@ A modernized rebuild of the BonesDB cadaver tracking application for the Forensi
 ## Project Structure
 
 ```
-bones-db-v2/
+fant/
 ├── backend/
 │   ├── assets/
 │   │   ├── skeletal_inventory_homunculus.png

@@ -71,7 +71,7 @@ const AdminPanel = () => {
       const a = document.createElement("a");
       a.href = url;
       a.download = res.headers["content-disposition"]
-        ?.match(/filename="(.+)"/)?.[1] ?? "bonesdb-backup.json";
+        ?.match(/filename="(.+)"/)?.[1] ?? "fant-backup.json";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

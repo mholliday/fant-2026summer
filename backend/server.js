@@ -1,5 +1,5 @@
 /**
- * BonesDB v2 - Server Entry Point
+ * FANT - Server Entry Point
  * Modernized: native MongoDB driver replaced with Mongoose
  */
 require("dotenv").config();

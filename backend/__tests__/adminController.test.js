@@ -33,7 +33,7 @@ describe("backup", () => {
     expect(res.setHeader).toHaveBeenCalledWith("Content-Type", "application/json");
     expect(res.setHeader).toHaveBeenCalledWith(
       "Content-Disposition",
-      expect.stringMatching(/attachment; filename="bonesdb-backup-\d{4}-\d{2}-\d{2}\.json"/)
+      expect.stringMatching(/attachment; filename="fant-backup-\d{4}-\d{2}-\d{2}\.json"/)
     );
     const payload = JSON.parse(res.send.mock.calls[0][0]);
     expect(payload.donors).toEqual(donors);

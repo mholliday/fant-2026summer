@@ -7,11 +7,11 @@ services:
       - ./backend/.env
     environment:
       # Override .env's localhost so the container reaches the mongo service
-      - BONES_DB_URI=mongodb://mongo:27017/bonesdb
+      - BONES_DB_URI=mongodb://mongo:27017/fant
     depends_on:
       - mongo
     networks:
-      - bonesdb
+      - fant
 
   frontend:
     build: ./frontend
@@ -22,7 +22,7 @@ services:
     depends_on:
       - backend
     networks:
-      - bonesdb
+      - fant
 
   mongo:
     image: mongo:7
@@ -31,10 +31,10 @@ services:
     ports:
       - "27017:27017"
     networks:
-      - bonesdb
+      - fant
 
 volumes:
   mongo_data:
 
 networks:
-  bonesdb:
+  fant:

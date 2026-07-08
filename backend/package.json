@@ -1,7 +1,7 @@
 {
-  "name": "bones-db-backend",
+  "name": "fant-backend",
   "version": "2.0.0",
-  "description": "BonesDB backend - modernized with Mongoose",
+  "description": "FANT backend - modernized with Mongoose",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

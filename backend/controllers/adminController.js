@@ -16,7 +16,7 @@ const backup = async (req, res) => {
     ]);
 
     const payload = JSON.stringify({ donors, versions, users }, null, 2);
-    const filename = 'bonesdb-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    const filename = 'fant-backup-' + new Date().toISOString().slice(0, 10) + '.json';
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', 'attachment; filename="' + filename + '"');

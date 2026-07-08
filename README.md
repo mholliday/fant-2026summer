@@ -1,6 +1,271 @@
 # FANT
 
-A modernized rebuild of the FANT cadaver tracking application for the Forensic Osteology Research Station (FOREST) at Western Carolina University.
+A cadaver tracking tool for the Forensic Osteology Research Station (FOREST) at Western Carolina University.
+
+## Key Features
+
+- User management
+  - Access control with a 4-bit permission bitmask
+- Cadaver data tracking
+  - Identification details
+  - Skeletal and dental completeness
+  - Osteometric measurements
+  - Notes
+- Cadaver versioning
+
+## Table of Contents
+
+- [Why?](#why)
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+  - [Development Environment](#development-environment)
+  - [Docker](#docker)
+- [Scripts](#scripts)
+- [Project Structure](#project-structure)
+- [Environment Variables](#environment-variables)
+- [Access Level Bitmask](#access-level-bitmask)
+- [What Changed](#what-changed)
+- [Bugs Fixed](#bugs-fixed)
+
+## Why?
+
+The Forensic Anthropology (FA) program in the department of Anthropology and Sociology at Western Carolina University (WCU) maintains a body farm known as the Forensic Osteology Research Station or FOREST. The purpose of such a body farm is to track the decay of cadavers over time and under various conditions. Data recorded from body farms can be used to better understand the decomposition process. This knowledge is often very useful to law enforcement, helping to pinpoint a victim's time of death. Currently the FA program at WCU collects cadaver data on paper and stores it in a "difficult-to-navigate" database. The goal for this project is to transform this process, making it as painless as possible.
+
+## Getting Started
+
+The goal of this documentation is to assist future maintainers, likely another capstone team. We are assuming little to no knowledge of involved technologies, as that is the position we were in when starting.
+
+### Installation
+
+FANT is a [MERN](https://www.mongodb.com/mern-stack) stack application. You will need:
+
+- [Node 20+](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+- A MongoDB database
+  - We recommend using a cloud platform like [MongoDB Atlas](https://www.mongodb.com/atlas) while in development — this lets all developers share the same data.
+  - You will need to set your database URL in the backend `.env` file.
+- FANT source code — clone this repository
+
+Once you have the source code, install dependencies for the backend and frontend separately:
+
+```bash
+# Backend
+cd backend
+npm install
+
+# Frontend
+cd ../frontend
+npm install
+```
+
+Copy the example environment files and fill in your values:
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+### Development Environment
+
+Both the frontend and backend have development launchers that restart automatically when changes are made. They are separate programs and must be launched independently — we recommend using a split terminal or a terminal multiplexer like `tmux`.
+
+```bash
+# Terminal 1 — backend (runs on port 8000)
+cd backend
+npm run dev
+
+# Terminal 2 — frontend (runs on port 3000)
+cd frontend
+npm run dev
+```
+
+Vite's dev server proxies `/api` requests to the backend automatically (configured in `vite.config.js`), so no CORS issues during development.
+
+### Docker
+
+The recommended way to run FANT for non-development use. Docker handles the backend, frontend, and MongoDB together.
+
+```bash
+# Copy and fill in backend .env first
+cp backend/.env.example backend/.env
+
+# First run or after code changes
+docker compose up --build
+
+# Subsequent runs (no code changes)
+docker compose up
+```
+
+The app will be available at `http://localhost:3000`. The default admin credentials are set by `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `backend/.env` — the server seeds this user automatically on first startup.
+
+---
+
+## Scripts
+
+### Backend (`cd backend`)
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start backend with nodemon (auto-restarts on changes) |
+| `npm start` | Start backend without auto-restart |
+| `npm test` | Run backend test suite (Jest) |
+| `npm run seed:admin` | Manually seed the admin user (idempotent) |
+
+### Frontend (`cd frontend`)
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server on port 3000 |
+| `npm run build` | Build for production (output to `dist/`) |
+| `npm test` | Run frontend test suite (Vitest) |
+
+---
+
+## Project Structure
+
+```
+fant/
+├── backend/
+│   ├── assets/
+│   │   ├── skeletal_inventory_homunculus.png
+│   │   ├── skeleton.svg
+│   │   └── trauma_homunculus.png
+│   ├── config/
+│   │   └── corsOptions.js
+│   ├── controllers/
+│   │   ├── adminController.js
+│   │   ├── authController.js
+│   │   ├── donorController.js
+│   │   └── userController.js
+│   ├── middleware/
+│   │   ├── accessChecker.js
+│   │   ├── archivedFilter.js
+│   │   ├── errorHandler.js
+│   │   ├── logger.js
+│   │   └── loginLimit.js
+│   ├── models/
+│   │   ├── Donor.js
+│   │   ├── Version.js
+│   │   ├── User.js
+│   │   ├── donorDAO.js
+│   │   ├── userDAO.js
+│   │   └── versionDAO.js
+│   ├── reference/
+│   │   ├── skeletal-inventory.pdf
+│   │   └── williams-collection-forms.docx
+│   ├── routes/
+│   │   ├── adminRoutes.js
+│   │   ├── authRoutes.js
+│   │   ├── donorRoutes.js
+│   │   └── userRoutes.js
+│   ├── scripts/
+│   │   ├── migrateRecorderDate.js
+│   │   └── seedAdmin.js
+│   ├── utilities/
+│   │   ├── htmlTemplate.js
+│   │   ├── passwordChecking.js
+│   │   ├── permissions.js
+│   │   └── williamsData.js
+│   ├── .env.example
+│   ├── Dockerfile
+│   ├── package.json
+│   └── server.js
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── misc/          (ErrorHandling, NotFound)
+│   │   │   ├── route-protection/ (PrivateRoute, ProtectedRoute, PublicRoute)
+│   │   │   ├── AdminPanel.js
+│   │   │   ├── Dashboard.js
+│   │   │   ├── DonorView.js
+│   │   │   ├── Homunculus.js
+│   │   │   ├── Landing.js
+│   │   │   ├── Login.js
+│   │   │   ├── ModifyDonor.js
+│   │   │   ├── NavigationBar.js
+│   │   │   └── ResetPassword.js
+│   │   ├── contexts/
+│   │   │   └── AppContext.js
+│   │   ├── services/
+│   │   │   ├── adminDataService.js
+│   │   │   ├── authDataService.js
+│   │   │   ├── authService.js
+│   │   │   ├── axiosConfig.js
+│   │   │   ├── donorDataService.js
+│   │   │   ├── userDataService.js
+│   │   │   └── williamsForm.js
+│   │   ├── utilities/
+│   │   │   └── permissions.js
+│   │   ├── App.js
+│   │   └── main.jsx
+│   ├── .env.example
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── nginx.conf
+│   └── package.json
+└── docker-compose.yml
+```
+
+### Backend
+
+- `config/` — Server configuration (CORS options)
+- `controllers/` — Route handler logic
+- `models/` — Mongoose schemas and data access objects (DAOs) that interact with MongoDB
+- `middleware/` — Code that requests pass through before reaching controllers (auth checks, logging, rate limiting)
+- `routes/` — Maps incoming requests to the appropriate controllers
+- `scripts/` — Utility scripts (`seedAdmin.js` to bootstrap the first admin user, `migrateRecorderDate.js` for a one-time data migration)
+- `utilities/` — Shared helper functions
+- `assets/` — Images embedded in generated PDFs
+- `reference/` — Blank source forms served to the frontend (skeletal inventory PDF, Williams collection forms)
+- `server.js` — Entry point
+
+### Frontend
+
+- `src/components/` — All UI components. Top-level components map to pages; subdirectories hold supporting components.
+- `src/contexts/` — React context providers for managing shared state (auth, API access)
+- `src/services/` — API communication layer (Axios config, per-resource data services)
+- `src/utilities/` — Shared helper functions
+- `index.html` — Vite entry HTML
+- `main.jsx` — React entry point
+- `nginx.conf` — Nginx config used in the production Docker image
+
+---
+
+## Environment Variables
+
+### Backend (`backend/.env`)
+
+| Variable | Description |
+|----------|-------------|
+| `FANT_DB_URI` | MongoDB connection URI |
+| `ACCESS_TOKEN_SECRET` | Secret for signing access JWTs |
+| `REFRESH_TOKEN_SECRET` | Secret for signing refresh JWTs |
+| `PORT` | Server port (default: 8000) |
+| `NODE_ENV` | `development` or `production` (controls secure cookie) |
+| `ADMIN_USERNAME` | Username for the auto-seeded admin account |
+| `ADMIN_PASSWORD` | Password for the auto-seeded admin account |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | Full backend API URL. Leave blank in dev to use Vite proxy. Note: Vite requires the `VITE_` prefix. |
+
+---
+
+## Access Level Bitmask
+
+The access system uses a 4-bit bitmask (0–15):
+
+| Bit | Meaning |
+|-----|---------|
+| bit 3 (0x8) | Immutable — cannot be modified by any admin |
+| bit 2 (0x4) | Can read donors |
+| bit 1 (0x2) | Can write/modify donors |
+| bit 0 (0x1) | Is admin (user management) |
+
+Common levels: `0` = no access, `7` = full (read+write+admin), `15` = super-admin (immutable).
+
+---
 
 ## What Changed
 
@@ -69,157 +334,3 @@ A modernized rebuild of the FANT cadaver tracking application for the Forensic O
 
 #### `components/Login.js`
 - **Unused `redirect` import** — `redirect` was imported from `react-router-dom` but never used. Removed.
-
----
-
-## Project Structure
-
-```
-fant/
-├── backend/
-│   ├── assets/
-│   │   ├── skeletal_inventory_homunculus.png
-│   │   ├── skeleton.svg
-│   │   └── trauma_homunculus.png
-│   ├── config/
-│   │   └── corsOptions.js
-│   ├── controllers/
-│   │   ├── adminController.js
-│   │   ├── authController.js
-│   │   ├── donorController.js
-│   │   └── userController.js
-│   ├── middleware/
-│   │   ├── accessChecker.js
-│   │   ├── archivedFilter.js
-│   │   ├── errorHandler.js
-│   │   ├── logger.js
-│   │   └── loginLimit.js
-│   ├── models/               ← NEW: Mongoose models + DAOs
-│   │   ├── Donor.js
-│   │   ├── Version.js
-│   │   ├── User.js
-│   │   ├── donorDAO.js
-│   │   ├── userDAO.js
-│   │   └── versionDAO.js
-│   ├── reference/
-│   │   ├── skeletal-inventory.pdf
-│   │   └── williams-collection-forms.docx
-│   ├── routes/
-│   │   ├── adminRoutes.js
-│   │   ├── authRoutes.js
-│   │   ├── donorRoutes.js
-│   │   └── userRoutes.js
-│   ├── scripts/
-│   │   ├── migrateRecorderDate.js
-│   │   └── seedAdmin.js
-│   ├── utilities/
-│   │   ├── htmlTemplate.js
-│   │   ├── passwordChecking.js
-│   │   ├── permissions.js
-│   │   └── williamsData.js
-│   ├── .env.example
-│   ├── Dockerfile
-│   ├── package.json
-│   └── server.js
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── misc/          (ErrorHandling, NotFound)
-│   │   │   ├── route-protection/ (PrivateRoute, ProtectedRoute, PublicRoute)
-│   │   │   ├── AdminPanel.js
-│   │   │   ├── Dashboard.js
-│   │   │   ├── DonorView.js
-│   │   │   ├── Homunculus.js
-│   │   │   ├── Landing.js
-│   │   │   ├── Login.js
-│   │   │   ├── ModifyDonor.js
-│   │   │   ├── NavigationBar.js
-│   │   │   └── ResetPassword.js
-│   │   ├── contexts/
-│   │   │   └── AppContext.js
-│   │   ├── services/
-│   │   │   ├── adminDataService.js
-│   │   │   ├── authDataService.js
-│   │   │   ├── authService.js
-│   │   │   ├── axiosConfig.js
-│   │   │   ├── donorDataService.js
-│   │   │   ├── userDataService.js
-│   │   │   └── williamsForm.js
-│   │   ├── utilities/
-│   │   │   └── permissions.js
-│   │   ├── App.js
-│   │   └── main.jsx
-│   ├── .env.example
-│   ├── Dockerfile
-│   ├── index.html
-│   ├── nginx.conf
-│   └── package.json
-└── docker-compose.yml
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-- Node 20+
-- MongoDB (local or Atlas)
-
-### Backend
-```bash
-cd backend
-cp .env.example .env
-# Edit .env with your MongoDB URI and JWT secrets
-npm install
-npm run dev
-```
-
-### Frontend
-```bash
-cd frontend
-cp .env.example .env
-npm install
-npm run dev
-```
-
-Vite's dev server proxies `/api` requests to the backend automatically (configured in `vite.config.js`), so no CORS issues during development. The dev server starts on port 3000 by default.
-
-### Docker
-```bash
-# Copy and fill in backend .env first
-cp backend/.env.example backend/.env
-docker-compose up --build
-```
-
----
-
-## Environment Variables
-
-### Backend (`.env`)
-| Variable | Description |
-|----------|-------------|
-| `FANT_DB_URI` | MongoDB connection URI |
-| `ACCESS_TOKEN_SECRET` | Secret for signing access JWTs |
-| `REFRESH_TOKEN_SECRET` | Secret for signing refresh JWTs |
-| `PORT` | Server port (default: 8000) |
-| `NODE_ENV` | `development` or `production` (controls secure cookie) |
-
-### Frontend (`.env`)
-| Variable | Description |
-|----------|-------------|
-| `VITE_API_URL` | Full backend API URL. Leave blank in dev to use Vite proxy. Note: Vite requires the `VITE_` prefix. |
-
----
-
-## Access Level Bitmask
-
-The access system uses a 4-bit bitmask (0–15):
-
-| Bit | Meaning |
-|-----|---------|
-| bit 3 (0x8) | Immutable — cannot be modified by any admin |
-| bit 2 (0x4) | Can read donors |
-| bit 1 (0x2) | Can write/modify donors |
-| bit 0 (0x1) | Is admin (user management) |
-
-Common levels: `0` = no access, `7` = full (read+write+admin), `15` = super-admin (immutable).

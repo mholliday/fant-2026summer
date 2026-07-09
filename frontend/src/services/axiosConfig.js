@@ -30,8 +30,14 @@ class AxiosConfig {
         const status = error.response ? error.response.status : null;
         const originalRequest = error.config;
 
+        // Never try to "refresh" a failed refresh request — that just loops
+        // (403 -> refresh -> 403 -> refresh -> ...). A failed refresh means
+        // the session is gone; let it reject so the app drops to logged-out.
+        const isRefreshCall =
+          originalRequest?.url && originalRequest.url.includes("/auth/refresh");
+
         // Avoid infinite retry loops
-        if (status === 403 && !originalRequest._retry) {
+        if (status === 403 && !originalRequest._retry && !isRefreshCall) {
           originalRequest._retry = true;
           try {
             const res = await this.auth.refresh();

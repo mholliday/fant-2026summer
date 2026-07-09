@@ -23,7 +23,9 @@ function App() {
     <StateProvider>
       <ThemeProvider minBreakpoint="lg">
         <Router>
-          <NavigationBar />
+          <ErrorBoundary>
+            <NavigationBar />
+          </ErrorBoundary>
           <div className="container mt-3">
             <ErrorBoundary>
               <Routes>

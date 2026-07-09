@@ -1,0 +1,9 @@
+{
+  "name": "run-fant-driver",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright driver used by .claude/skills/run-fant to launch and interact with the FANT app for a running agent.",
+  "dependencies": {
+    "playwright": "^1.61.1"
+  }
+}

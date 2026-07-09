@@ -27,3 +27,6 @@ npm-debug.log*
 
 # WSL download artifacts
 *:Zone.Identifier
+
+# Agent run-skill driver output
+.claude/skills/run-fant/screenshots/

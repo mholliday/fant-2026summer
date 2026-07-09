@@ -18,6 +18,7 @@
  */
 const DonorDAO = require("../models/donorDAO");
 const VersionDAO = require("../models/versionDAO");
+const ImageDAO = require("../models/imageDAO");
 const { v4: uuid } = require("uuid");
 const asyncHandler = require("express-async-handler");
 const XXH = require("xxhashjs");
@@ -306,6 +307,7 @@ const deleteArchivedDonor = asyncHandler(async (req, res) => {
 
   await DonorDAO.deleteArchivedDonor(req.query.did);
   await VersionDAO.deleteVersionsByDonorID(req.query.did);
+  await ImageDAO.deleteImagesByDonorID(req.query.did);
   res.status(200).json({ message: `Donor (${req.query.did}) deleted` });
 });
 
@@ -324,7 +326,20 @@ const getPDF = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Donor not found" });
   }
 
-  const html = generateHtml(donor);
+  // Attach the donor's images as base64 data URIs so they render in the PDF.
+  // A failure to load images should not prevent the rest of the PDF.
+  let images = [];
+  try {
+    const raw = await ImageDAO.getImagesForDonor(req.query.did);
+    images = raw.map((img) => ({
+      filename: img.filename,
+      dataUri: `data:${img.contentType};base64,${img.buffer.toString("base64")}`,
+    }));
+  } catch (e) {
+    console.error(`Failed to load donor images for PDF: ${e}`);
+  }
+
+  const html = generateHtml(donor, images);
 
   // Try puppeteer; fall back to returning HTML if not available
   try {

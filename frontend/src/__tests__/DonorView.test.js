@@ -24,6 +24,8 @@ const mockApi = {
   donor: {
     getByDid: vi.fn(() => Promise.resolve({ data: { donor: makeDonorPayload() } })),
     getVersions: vi.fn(() => Promise.resolve({ data: { versionsList: [] } })),
+    getImages: vi.fn(() => Promise.resolve({ data: { images: [] } })),
+    getImageBlob: vi.fn(() => Promise.resolve({ data: new Blob() })),
   },
 };
 

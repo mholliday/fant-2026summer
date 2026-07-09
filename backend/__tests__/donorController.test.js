@@ -1,11 +1,13 @@
 "use strict";
 jest.mock("../models/donorDAO");
 jest.mock("../models/versionDAO");
+jest.mock("../models/imageDAO");
 jest.mock("../utilities/htmlTemplate", () => ({ generateHtml: jest.fn().mockReturnValue("<html></html>") }));
 jest.mock("puppeteer", () => { throw new Error("puppeteer not available"); }, { virtual: true });
 
 const DonorDAO   = require("../models/donorDAO");
 const VersionDAO = require("../models/versionDAO");
+const ImageDAO   = require("../models/imageDAO");
 const {
   getNextID, getAllMostRecentDonors, getDonorById,
   createNewDonor, addNewDonorVersion, archiveDonor,
@@ -272,9 +274,11 @@ describe("deleteArchivedDonor", () => {
   it("200 on success", async () => {
     DonorDAO.deleteArchivedDonor.mockResolvedValue({});
     VersionDAO.deleteVersionsByDonorID.mockResolvedValue({});
+    ImageDAO.deleteImagesByDonorID.mockResolvedValue(0);
     const { req, res } = mk({ query:{did:"2026-1"} });
     await deleteArchivedDonor(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
+    expect(ImageDAO.deleteImagesByDonorID).toHaveBeenCalledWith("2026-1");
   });
 });
 
@@ -292,6 +296,7 @@ describe("getPDF", () => {
   });
   it("falls back to HTML when puppeteer unavailable", async () => {
     DonorDAO.getDonorByID.mockResolvedValue({ donorID:"2026-1" });
+    ImageDAO.getImagesForDonor.mockResolvedValue([]);
     const { req, res } = mk({ query:{did:"2026-1"} });
     await getPDF(req, res);
     expect(res.set).toHaveBeenCalledWith("Content-Type", "text/html");

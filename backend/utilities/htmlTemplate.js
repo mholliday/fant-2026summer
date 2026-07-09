@@ -27,7 +27,7 @@ const esc = (v) =>
   v == null ? "" : String(v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const code = (v) => (v ? esc(v) : "-");
 
-const generateHtml = (donor) => {
+const generateHtml = (donor, images = []) => {
   const d = donor?.data ?? {};
   const id = d.identification ?? {};
   const sk = d.skeleton ?? {};
@@ -136,6 +136,9 @@ const generateHtml = (donor) => {
     .box { border: 1px solid #000; padding: 8px; margin-top: 4px; min-height: 48px; white-space: pre-wrap; }
     .pagebreak { page-break-before: always; }
     .legend span { display: inline-block; width: 10px; height: 10px; border: 1px solid #6c757d; vertical-align: middle; }
+    .attachment { text-align: center; margin: 8px 0 16px; page-break-inside: avoid; }
+    .attachment img { max-width: 100%; max-height: 8.5in; height: auto; border: 1px solid #999; }
+    .attachment-name { font-size: 8px; color: #333; margin-top: 2px; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -222,6 +225,19 @@ const generateHtml = (donor) => {
 
   ${noteBox("Continuation to Skeletal Analysis", notes.continuation)}
   ${instrExemplarsHtml("continuation")}
+${images.length ? `
+  <!-- PAGE 3+: Attached Images -->
+  <div class="pagebreak"></div>
+  <div class="header">
+    <h2 class="title">ATTACHED IMAGES</h2>
+    <span class="donor-id">Donor ID: ${esc(donor.donorID)}</span>
+  </div>
+  ${images
+    .map(
+      (img) =>
+        `<div class="attachment"><img src="${img.dataUri}" /><div class="attachment-name">${esc(img.filename)}</div></div>`
+    )
+    .join("")}` : ""}
 
 </div>
 </body>

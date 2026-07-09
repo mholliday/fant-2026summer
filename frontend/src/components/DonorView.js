@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button, Stack, Spinner, Alert, Badge, Card, Table, Collapse, Tabs, Tab } from "react-bootstrap";
 import { useAuth, useAPI } from "../contexts/AppContext";
 import { ANALYSIS_FIELDS, ELEMENT_GROUPS, elemKey } from "../services/williamsForm";
+import DonorImages from "./DonorImages";
 
 // Osteometry order follows the Skeletal Analysis numbered list; measurements not on the
 // form are kept but appended at the end of their bone group.
@@ -791,6 +792,9 @@ const DonorView = () => {
           </Button>
         </Stack>
       </div>
+
+      {/* Image attachments */}
+      <DonorImages did={did} api={api} canEdit={canWrite && !donor.archived} />
 
       <Tabs
         activeKey={activeTab}

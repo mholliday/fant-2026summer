@@ -64,6 +64,29 @@ class DonorDataService {
     return this.axios.instance.get(`/donor/pdf?did=${did}`, { responseType: "blob" });
   }
 
+  // ── Image attachments ──────────────────────────────────────────────
+  uploadImage(did, file) {
+    const formData = new FormData();
+    formData.append("image", file);
+    // Content-Type is set to undefined so the browser supplies the correct
+    // multipart/form-data boundary (overriding the instance's JSON default).
+    return this.axios.instance.post(`/donor/${did}/images`, formData, {
+      headers: { "Content-Type": undefined },
+    });
+  }
+
+  getImages(did) {
+    return this.axios.instance.get(`/donor/${did}/images`);
+  }
+
+  getImageBlob(imageId) {
+    return this.axios.instance.get(`/donor/images/${imageId}`, { responseType: "blob" });
+  }
+
+  deleteImage(imageId) {
+    return this.axios.instance.delete(`/donor/images/${imageId}`);
+  }
+
   findArch(filters, page = 0) {
     const params = new URLSearchParams();
     for (let key in filters) {

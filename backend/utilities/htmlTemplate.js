@@ -1,6 +1,6 @@
 // htmlTemplate.js — generates the donor inventory HTML for PDF export.
 // Page 1: WCU Skeletal Inventory (identification, dentition, bone completeness).
-// Page 2+: Williams analysis form (header, element present/absent, homunculus,
+// Page 2+: Skeletal Analysis form (header, element present/absent, homunculus,
 //          osteometry, notes).
 //
 // Bug fix: the previous version declared nested skeleton objects (sk.cranial,
@@ -16,7 +16,7 @@ const {
   elemKey,
 } = require("./williamsData");
 
-// The two skeletal figures shown on the Williams page (each front + back view).
+// The two skeletal figures shown on the Skeletal Analysis page (each front + back view).
 // Loaded once and inlined as base64 data URIs so they render in the PDF without
 // depending on a base URL.
 const loadImg = (file) => {
@@ -47,6 +47,7 @@ const generateHtml = (donor) => {
   const id = d.identification ?? {};
   const sk = d.skeleton ?? {};
   const teeth = d.dentition?.teeth ?? Array(32).fill("-");
+  const toothWearScores = d.dentition?.wearScores ?? Array(32).fill("-");
   const notes = d.notes ?? {};
   const analysis = d.analysis ?? {};
   const inventory = d.element_inventory ?? {};
@@ -95,7 +96,7 @@ const generateHtml = (donor) => {
         <td class="lbl">R${i+6}</td><td class="num">${code(sk[`rib${i+6}_l`])}</td><td class="num">${code(sk[`rib${i+6}_r`])}</td></tr>`
   ).join("");
 
-  // ---- Williams element present/absent table (page 2) ----
+  // ---- Skeletal Analysis element present/absent table (page 2) ----
   const inventoryGroups = ELEMENT_GROUPS.map((group) => {
     const body = group.elements.map((el) => {
       const cell = inventory[elemKey(group.key, el.key)] ?? { absent: false, obs: "" };
@@ -155,9 +156,9 @@ const generateHtml = (donor) => {
 <body>
 <div class="document">
 
-  <!-- PAGE 1: Williams analysis form -->
+  <!-- PAGE 1: Skeletal Analysis form -->
   <div class="header">
-    <h2 class="title">WILLIAMS COLLECTION — INVENTORY &amp; ANALYSIS</h2>
+    <h2 class="title">SKELETAL ANALYSIS — INVENTORY &amp; ANALYSIS</h2>
     <span class="donor-id">Donor ID: ${esc(donor.donorID)}</span>
   </div>
 
@@ -200,10 +201,12 @@ const generateHtml = (donor) => {
     <p><b>Date:</b> ${code(sk.date)}</p>
   </div>
 
-  <p class="subhead">Dentition <span style="font-weight:normal">(A=antemortem, P=postmortem, N=natural, D=dental work)</span></p>
+  <p class="subhead">Dentition <span style="font-weight:normal">(A=antemortem, P=postmortem, N=natural, D=dental work; Wear Score 1–5)</span></p>
   <table>
     <tr><td class="lbl">Upper (1–16)</td>${teeth.slice(0,16).map(t=>`<td class="num">${code(t)}</td>`).join("")}</tr>
+    <tr><td class="lbl">Upper Wear Score</td>${toothWearScores.slice(0,16).map(t=>`<td class="num">${code(t)}</td>`).join("")}</tr>
     <tr><td class="lbl">Lower (32–17)</td>${teeth.slice(16,32).reverse().map(t=>`<td class="num">${code(t)}</td>`).join("")}</tr>
+    <tr><td class="lbl">Lower Wear Score</td>${toothWearScores.slice(16,32).reverse().map(t=>`<td class="num">${code(t)}</td>`).join("")}</tr>
   </table>
 
   <h3>Skeletal Inventory <span style="font-size:7px;font-weight:normal">(1=100% · 2=99–75% · 3=74–25% · 4=&lt;25% · 5=absent)</span></h3>

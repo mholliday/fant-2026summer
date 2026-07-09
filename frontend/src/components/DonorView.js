@@ -6,7 +6,7 @@ import { ANALYSIS_FIELDS, ELEMENT_GROUPS, elemKey } from "../services/williamsFo
 import skeletalHomunculusImg from "../assets/skeletal_inventory_homunculus.png";
 import traumaHomunculusImg from "../assets/trauma_homunculus.png";
 
-// Osteometry order follows the Williams numbered list; measurements not on the
+// Osteometry order follows the Skeletal Analysis numbered list; measurements not on the
 // form are kept but appended at the end of their bone group.
 const OSTEOMETRY_FIELDS = {
   cranium: [
@@ -262,6 +262,7 @@ const DonorView = () => {
   const notes      = donor.data?.notes ?? {};
   const skeleton   = donor.data?.skeleton ?? {};
   const teeth      = donor.data?.dentition?.teeth ?? Array(32).fill("N");
+  const wearScores = donor.data?.dentition?.wearScores ?? Array(32).fill("");
   const analysis   = donor.data?.analysis ?? {};
   const inventory  = donor.data?.element_inventory ?? {};
   const hasAnalysis  = ANALYSIS_FIELDS.some(f => analysis[f.key]);
@@ -306,10 +307,10 @@ const DonorView = () => {
     </Card>
   );
 
-  // ---- Williams Analysis form ----------------------------------------------
+  // ---- Skeletal Analysis form ------------------------------------------------
   const williamsView = (
     <>
-      {/* Analysis (Williams form header) — front of the Williams packet */}
+      {/* Analysis (Skeletal Analysis form header) — front of the Skeletal Analysis packet */}
       {hasAnalysis && (
         <div className="mb-3">
           <h5>Analysis</h5>
@@ -505,14 +506,14 @@ const DonorView = () => {
           <Card.Header onClick={() => toggleGroup("_dentition")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center py-2">
             <span className="fw-semibold">Dentition</span>
             <span className="d-flex align-items-center gap-3">
-              <span className="text-muted small">A=antemortem absence, P=postmortem absence, N=natural, D=dental work</span>
+              <span className="text-muted small">A=antemortem absence, P=postmortem absence, N=natural, D=dental work; Wear Score 1–5</span>
               <span className="text-muted">{openGroups["_dentition"] ? "▲" : "▼"}</span>
             </span>
           </Card.Header>
         </Card>
         <Collapse in={!!openGroups["_dentition"]}>
         <div>
-          <p className="text-muted small mb-2 mt-1">A=antemortem absence, P=postmortem absence, N=natural, D=dental work</p>
+          <p className="text-muted small mb-2 mt-1">A=antemortem absence, P=postmortem absence, N=natural, D=dental work; Wear Score 1–5</p>
           <Card className="mb-2">
             <Card.Header className="py-2 small fw-semibold">Upper jaw (teeth 1–16)</Card.Header>
             <Card.Body className="py-2">
@@ -523,6 +524,7 @@ const DonorView = () => {
                     <Badge bg={teeth[i] === "N" ? "light" : teeth[i] === "A" ? "danger" : teeth[i] === "P" ? "warning" : "info"} text={teeth[i] === "N" ? "dark" : undefined}>
                       {teeth[i]}
                     </Badge>
+                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>{wearScores[i] || "—"}</div>
                   </div>
                 ))}
               </div>
@@ -541,6 +543,7 @@ const DonorView = () => {
                       <Badge bg={teeth[idx] === "N" ? "light" : teeth[idx] === "A" ? "danger" : teeth[idx] === "P" ? "warning" : "info"} text={teeth[idx] === "N" ? "dark" : undefined}>
                         {teeth[idx]}
                       </Badge>
+                      <div className="text-muted" style={{ fontSize: "0.7rem" }}>{wearScores[idx] || "—"}</div>
                     </div>
                   );
                 })}
@@ -796,7 +799,7 @@ const DonorView = () => {
         <h5>Reference Forms</h5>
         <Stack direction="horizontal" gap={2}>
           <Button size="sm" variant="outline-secondary" href={`${refBase}williams-collection-forms.docx`} target="_blank" rel="noreferrer">
-            Williams Collection Forms (.docx)
+            Skeletal Analysis Collection Forms (.docx)
           </Button>
           <Button size="sm" variant="outline-secondary" href={`${refBase}skeletal-inventory.pdf`} target="_blank" rel="noreferrer">
             SKELETAL INVENTORY.pdf
@@ -809,11 +812,11 @@ const DonorView = () => {
         onSelect={(k) => setActiveTab((prev) => (prev === k ? null : k))}
         className="mb-3"
       >
-        <Tab eventKey="williams" title="Williams Analysis">
-          {williamsView}
-        </Tab>
         <Tab eventKey="skeletal" title="Skeletal Inventory">
           {skeletalView}
+        </Tab>
+        <Tab eventKey="williams" title="Skeletal Analysis">
+          {williamsView}
         </Tab>
       </Tabs>
 

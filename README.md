@@ -215,7 +215,7 @@ fant/
 - `scripts/` — Utility scripts (`seedAdmin.js` to bootstrap the first admin user, `migrateRecorderDate.js` for a one-time data migration)
 - `utilities/` — Shared helper functions
 - `assets/` — Images embedded in generated PDFs
-- `reference/` — Blank source forms served to the frontend (skeletal inventory PDF, Williams collection forms)
+- `reference/` — Blank source forms served to the frontend (skeletal inventory PDF, Skeletal Analysis collection forms)
 - `server.js` — Entry point
 
 ### Frontend

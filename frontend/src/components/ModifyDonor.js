@@ -13,7 +13,7 @@ import {
 import skeletalHomunculusImg from "../assets/skeletal_inventory_homunculus.png";
 import traumaHomunculusImg from "../assets/trauma_homunculus.png";
 
-// Osteometry measurement order follows the Williams form's numbered list
+// Osteometry measurement order follows the Skeletal Analysis form's numbered list
 // (items 1–81). Measurements not on the form are kept but appended at the end
 // of their bone group.
 const OSTEOMETRY_FIELDS = {
@@ -165,6 +165,7 @@ const TARSAL_LABELS   = { calcaneus:"Calcaneus", talus:"Talus", navicular:"Navic
 const LONG_BONES      = ["humerus","radius","ulna","femur","tibia","fibula"];
 const LONG_LABELS     = { humerus:"Humerus", radius:"Radius", ulna:"Ulna", femur:"Femur", tibia:"Tibia", fibula:"Fibula" };
 const COMP_CODES      = ["1","2","3","4","5"];
+const WEAR_CODES      = ["1","2","3","4","5"];
 
 const defaultSkeleton = () => {
   const s = { comments: "" };
@@ -212,7 +213,7 @@ const defaultDonorData = () => ({
     condition: "good",
   },
   skeleton: defaultSkeleton(),
-  dentition: { teeth: Array(32).fill("N") },
+  dentition: { teeth: Array(32).fill("N"), wearScores: Array(32).fill("") },
   osteometry: Object.fromEntries(
     Object.values(OSTEOMETRY_FIELDS).flat().map((f) => [f.key, ""])
   ),
@@ -270,7 +271,8 @@ const ModifyDonor = ({ create = false }) => {
         saved.identification = { ...defaultDonorData().identification, ...(saved.identification ?? {}) };
         saved.osteometry = { ...defaultDonorData().osteometry, ...(saved.osteometry ?? {}) };
         saved.skeleton = { ...defaultSkeleton(), ...(saved.skeleton ?? {}) };
-        if (!saved.dentition?.teeth) saved.dentition = { teeth: Array(32).fill("N") };
+        if (!saved.dentition?.teeth) saved.dentition = { teeth: Array(32).fill("N"), wearScores: Array(32).fill("") };
+        if (!saved.dentition.wearScores) saved.dentition.wearScores = Array(32).fill("");
         saved.notes = { ...defaultDonorData().notes, ...(saved.notes ?? {}) };
         saved.analysis = { ...defaultAnalysis(), ...(saved.analysis ?? {}) };
         saved.element_inventory = { ...defaultElementInventory(), ...(saved.element_inventory ?? {}) };
@@ -312,7 +314,14 @@ const ModifyDonor = ({ create = false }) => {
     setDonorData((prev) => {
       const teeth = [...prev.dentition.teeth];
       teeth[index] = value;
-      return { ...prev, dentition: { teeth } };
+      return { ...prev, dentition: { ...prev.dentition, teeth } };
+    });
+
+  const handleWearScoreChange = (index, value) =>
+    setDonorData((prev) => {
+      const wearScores = [...prev.dentition.wearScores];
+      wearScores[index] = value;
+      return { ...prev, dentition: { ...prev.dentition, wearScores } };
     });
 
   const handleSubmit = async (e) => {
@@ -343,6 +352,7 @@ const ModifyDonor = ({ create = false }) => {
   const analysis = donorData.analysis ?? defaultAnalysis();
   const inventory = donorData.element_inventory ?? defaultElementInventory();
   const teeth = donorData.dentition?.teeth ?? Array(32).fill("N");
+  const wearScores = donorData.dentition?.wearScores ?? Array(32).fill("");
 
   const CodeSelect = ({ field, placeholder = "—" }) => (
     <Form.Select size="sm" value={skeleton[field] ?? ""} onChange={e => handleSkeletonChange(field, e.target.value)}>
@@ -363,7 +373,7 @@ const ModifyDonor = ({ create = false }) => {
     </h6>
   );
 
-  // Instruments/Equipment Used + Exemplars Used pair that the Williams form
+  // Instruments/Equipment Used + Exemplars Used pair that the Skeletal Analysis form
   // repeats under the Trauma, General Observations and Continuation boxes.
   // Returned as inline JSX (not a component) so inputs keep focus while typing.
   const instrExemplars = (base) => (
@@ -383,13 +393,13 @@ const ModifyDonor = ({ create = false }) => {
     </div>
   );
 
-  // ---- Williams Analysis form (John A. Williams Collection) ----------------
+  // ---- Skeletal Analysis form ------------------------------------------------
   const williamsTab = (
     <>
-      {/* Analysis Header (Williams form) — front of the Williams packet */}
+      {/* Analysis Header (Skeletal Analysis form) — front of the Skeletal Analysis packet */}
       <Card className="mb-3">
         <Card.Header onClick={() => toggle("analysis")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center">
-          <span><strong>Analysis</strong><span className="text-muted fw-normal ms-2 small">Williams Collection lab form header</span></span>
+          <span><strong>Analysis</strong><span className="text-muted fw-normal ms-2 small">Skeletal Analysis Collection lab form header</span></span>
           <span className="text-muted">{open.analysis ? "▲" : "▼"}</span>
         </Card.Header>
         <Collapse in={open.analysis}><div>
@@ -585,7 +595,7 @@ const ModifyDonor = ({ create = false }) => {
               <Form.Group>
                 <Form.Label>Ancestry</Form.Label>
                 <Form.Select value={id.ancestry} onChange={(e) => handleIdentChange("ancestry", e.target.value)}>
-                  {["white","african","asian","european","hispanic","native american","oceanian"].map(a => (
+                  {["white","african","asian","hispanic","native american"].map(a => (
                     <option key={a} value={a}>{a}</option>
                   ))}
                 </Form.Select>
@@ -641,7 +651,7 @@ const ModifyDonor = ({ create = false }) => {
       {/* Dentition */}
       <Card className="mb-3">
         <Card.Header onClick={() => toggle("dentition")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center">
-          <span><strong>Dentition</strong><span className="text-muted fw-normal ms-2 small">A=antemortem absence, P=postmortem absence, N=natural, D=dental work</span></span>
+          <span><strong>Dentition</strong><span className="text-muted fw-normal ms-2 small">A=antemortem absence, P=postmortem absence, N=natural, D=dental work; Wear Score 1–5</span></span>
           <span className="text-muted">{open.dentition ? "▲" : "▼"}</span>
         </Card.Header>
         <Collapse in={open.dentition}><div>
@@ -653,6 +663,10 @@ const ModifyDonor = ({ create = false }) => {
                 <div className="small text-muted">{i + 1}</div>
                 <Form.Select size="sm" value={teeth[i]} onChange={e => handleDentitionChange(i, e.target.value)}>
                   {["N","A","P","D"].map(c => <option key={c} value={c}>{c}</option>)}
+                </Form.Select>
+                <Form.Select size="sm" className="mt-1" value={wearScores[i] ?? ""} onChange={e => handleWearScoreChange(i, e.target.value)} title="Wear Score">
+                  <option value="">—</option>
+                  {WEAR_CODES.map(c => <option key={c} value={c}>{c}</option>)}
                 </Form.Select>
               </div>
             ))}
@@ -667,6 +681,10 @@ const ModifyDonor = ({ create = false }) => {
                   <div className="small text-muted">{idx + 1}</div>
                   <Form.Select size="sm" value={teeth[idx]} onChange={e => handleDentitionChange(idx, e.target.value)}>
                     {["N","A","P","D"].map(c => <option key={c} value={c}>{c}</option>)}
+                  </Form.Select>
+                  <Form.Select size="sm" className="mt-1" value={wearScores[idx] ?? ""} onChange={e => handleWearScoreChange(idx, e.target.value)} title="Wear Score">
+                    <option value="">—</option>
+                    {WEAR_CODES.map(c => <option key={c} value={c}>{c}</option>)}
                   </Form.Select>
                 </div>
               );
@@ -1017,11 +1035,11 @@ const ModifyDonor = ({ create = false }) => {
           onSelect={(k) => setActiveTab((prev) => (prev === k ? null : k))}
           className="mb-3"
         >
-          <Tab eventKey="williams" title="Williams Analysis">
-            {williamsTab}
-          </Tab>
           <Tab eventKey="skeletal" title="Skeletal Inventory">
             {skeletalTab}
+          </Tab>
+          <Tab eventKey="williams" title="Skeletal Analysis">
+            {williamsTab}
           </Tab>
         </Tabs>
 

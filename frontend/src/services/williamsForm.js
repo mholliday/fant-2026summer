@@ -1,11 +1,10 @@
 // williamsForm.js
-// Shared definitions for the "John A. Williams Human Skeletal Collection"
-// lab inventory & analysis form. Used by both the donor edit form
-// (ModifyDonor) and the donor view (DonorView). The backend PDF template
-// (backend/utilities/williamsTemplate.js) keeps a parallel copy of the
-// element list because it runs under CommonJS.
+// Shared definitions for the Skeletal Analysis lab inventory & analysis
+// form. Used by both the donor edit form (ModifyDonor) and the donor view
+// (DonorView). The backend PDF template (backend/utilities/williamsTemplate.js)
+// keeps a parallel copy of the element list because it runs under CommonJS.
 
-// --- Analysis header (top of the Williams packet) -------------------------
+// --- Analysis header (top of the Skeletal Analysis packet) ----------------
 export const ANALYSIS_FIELDS = [
   { key: "cil",          label: "CIL",                                     type: "text" },
   { key: "analyst",      label: "Analyst",                                 type: "text" },
@@ -20,7 +19,7 @@ export const ANALYSIS_FIELDS = [
 // Each group has a list of elements. The stored key for an element is
 // `${group.key}__${element.key}` so identical element names on the left and
 // right sides stay distinct.
-// Element order within each arm/leg follows the Williams .docx exactly (note the
+// Element order within each arm/leg follows the Skeletal Analysis .docx exactly (note the
 // carpal/tarsal ordering is the form's, not anatomical alphabetical).
 const ARM_ELEMENTS = [
   { key: "clavicle",        label: "Clavicle" },

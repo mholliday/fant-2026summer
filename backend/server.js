@@ -23,7 +23,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-// Blank reference forms (skeletal inventory PDF, Williams collection forms)
+// Blank reference forms (skeletal inventory PDF, Skeletal Analysis collection forms)
 app.use("/api/v2/reference", express.static(path.join(__dirname, "reference")));
 
 // Routes

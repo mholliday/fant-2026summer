@@ -52,11 +52,12 @@ describe("generateHtml utility", () => {
     expect(html).toContain("Some trauma note");
   });
 
-  it("omits notes section when both notes are empty", () => {
+  it("still renders labelled empty note boxes when both notes are empty", () => {
     const donor = makeDonor();
     donor.data.notes = { general_observations: "", trauma_and_pathological_analysis: "" };
     const html = generateHtml(donor);
-    expect(html).not.toContain("General Observations");
+    expect(html).toContain("General Observations");
+    expect(html).toContain("Trauma and Pathological Analysis");
   });
 
   it("renders autopsy=true correctly", () => {

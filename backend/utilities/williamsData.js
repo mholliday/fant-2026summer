@@ -1,5 +1,5 @@
 // williamsData.js (CommonJS)
-// Backend copy of the Williams analysis-form definitions used by the PDF
+// Backend copy of the Skeletal Analysis form definitions used by the PDF
 // template. Mirrors frontend/src/services/williamsForm.js (kept separate
 // because the frontend is ESM and this runs under CommonJS).
 
@@ -13,7 +13,7 @@ const ANALYSIS_FIELDS = [
   { key: "exemplars",    label: "Exemplars Used" },
 ];
 
-// Element order within each arm/leg follows the Williams .docx exactly.
+// Element order within each arm/leg follows the Skeletal Analysis .docx exactly.
 const ARM_ELEMENTS = [
   ["clavicle", "Clavicle"], ["scapula", "Scapula"], ["humerus", "Humerus"],
   ["radius", "Radius"], ["ulna", "Ulna"], ["hamate", "Hamate"],

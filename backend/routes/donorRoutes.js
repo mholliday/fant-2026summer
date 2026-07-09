@@ -51,6 +51,7 @@ router.route("/pdf").get(readChecker, DonorCtrl.getPDF);
 router
   .route("/images/:imageId")
   .get(readChecker, ImageCtrl.downloadImage)
+  .patch(writeChecker, ImageCtrl.updateImageCaption)
   .delete(writeChecker, ImageCtrl.deleteImage);
 
 router

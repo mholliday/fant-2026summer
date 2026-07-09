@@ -38,9 +38,26 @@ const uploadImage = asyncHandler(async (req, res) => {
     contentType: req.file.mimetype,
     buffer: req.file.buffer,
     uploadedBy: req.userID,
+    caption: (req.body.caption ?? "").trim(),
   });
 
   res.status(201).json({ message: "Image uploaded", image: meta });
+});
+
+/**
+ * PATCH /donor/images/:imageId   { caption }
+ * Updates an image's caption/description.
+ */
+const updateImageCaption = asyncHandler(async (req, res) => {
+  const { imageId } = req.params;
+  const caption = (req.body.caption ?? "").trim();
+
+  const updated = await ImageDAO.updateCaption(imageId, caption);
+  if (!updated) {
+    return res.status(404).json({ message: "Image not found" });
+  }
+
+  res.status(200).json({ message: "Caption updated", image: updated });
 });
 
 /**
@@ -101,4 +118,4 @@ const deleteImage = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Image deleted", imageId });
 });
 
-module.exports = { uploadImage, listImages, downloadImage, deleteImage };
+module.exports = { uploadImage, listImages, downloadImage, deleteImage, updateImageCaption };

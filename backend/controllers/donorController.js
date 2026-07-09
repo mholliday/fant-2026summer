@@ -333,6 +333,7 @@ const getPDF = asyncHandler(async (req, res) => {
     const raw = await ImageDAO.getImagesForDonor(req.query.did);
     images = raw.map((img) => ({
       filename: img.filename,
+      caption: img.caption,
       dataUri: `data:${img.contentType};base64,${img.buffer.toString("base64")}`,
     }));
   } catch (e) {

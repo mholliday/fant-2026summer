@@ -4,7 +4,7 @@ jest.mock("../models/donorDAO");
 
 const ImageDAO = require("../models/imageDAO");
 const DonorDAO = require("../models/donorDAO");
-const { uploadImage, listImages, downloadImage, deleteImage } = require("../controllers/imageController");
+const { uploadImage, listImages, downloadImage, deleteImage, updateImageCaption } = require("../controllers/imageController");
 
 const mk = (o = {}) => {
   const req = { body: {}, query: {}, params: {}, userID: "u1", ...o };
@@ -45,16 +45,34 @@ describe("uploadImage", () => {
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it("201 and returns metadata on success", async () => {
+  it("201 and returns metadata on success (with caption)", async () => {
     DonorDAO.doesDonorExist.mockResolvedValue(true);
-    ImageDAO.uploadImage.mockResolvedValue({ imageId: "abc123", donorID: "2026-1", filename: "scan.png" });
-    const { req, res } = mk({ params: { did: "2026-1" }, file: pngFile });
+    ImageDAO.uploadImage.mockResolvedValue({ imageId: "abc123", donorID: "2026-1", filename: "scan.png", caption: "left femur" });
+    const { req, res } = mk({ params: { did: "2026-1" }, file: pngFile, body: { caption: "left femur" } });
     await uploadImage(req, res);
     expect(ImageDAO.uploadImage).toHaveBeenCalledWith(
-      expect.objectContaining({ donorID: "2026-1", filename: "scan.png", contentType: "image/png", uploadedBy: "u1" })
+      expect.objectContaining({ donorID: "2026-1", filename: "scan.png", contentType: "image/png", uploadedBy: "u1", caption: "left femur" })
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ image: expect.objectContaining({ imageId: "abc123" }) }));
+  });
+});
+
+describe("updateImageCaption", () => {
+  it("404 when image not found", async () => {
+    ImageDAO.updateCaption.mockResolvedValue(null);
+    const { req, res } = mk({ params: { imageId: "missing" }, body: { caption: "x" } });
+    await updateImageCaption(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it("200 and trims the caption on success", async () => {
+    ImageDAO.updateCaption.mockResolvedValue({ imageId: "abc123", caption: "left femur" });
+    const { req, res } = mk({ params: { imageId: "abc123" }, body: { caption: "  left femur  " } });
+    await updateImageCaption(req, res);
+    expect(ImageDAO.updateCaption).toHaveBeenCalledWith("abc123", "left femur");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ image: expect.objectContaining({ caption: "left femur" }) }));
   });
 });
 

@@ -26,6 +26,7 @@ const toMeta = (f) => ({
   imageId: f._id.toString(),
   donorID: f.metadata?.donorID ?? null,
   filename: f.filename,
+  caption: f.metadata?.caption ?? "",
   contentType: f.metadata?.contentType ?? f.contentType ?? "application/octet-stream",
   size: f.length,
   uploadTime: f.uploadDate,
@@ -40,11 +41,11 @@ class ImageDAO {
   /**
    * Streams a buffer into GridFS. Resolves with the new file's metadata.
    */
-  static uploadImage({ donorID, filename, contentType, buffer, uploadedBy }) {
+  static uploadImage({ donorID, filename, contentType, buffer, uploadedBy, caption = "" }) {
     return new Promise((resolve, reject) => {
       const uploadStream = bucket().openUploadStream(filename, {
         contentType,
-        metadata: { donorID, contentType, uploadedBy, uploadTime: new Date() },
+        metadata: { donorID, contentType, uploadedBy, caption, uploadTime: new Date() },
       });
       uploadStream.on("error", reject);
       uploadStream.on("finish", () =>
@@ -52,6 +53,7 @@ class ImageDAO {
           imageId: uploadStream.id.toString(),
           donorID,
           filename,
+          caption,
           contentType,
           size: buffer.length,
           uploadedBy,
@@ -59,6 +61,22 @@ class ImageDAO {
       );
       uploadStream.end(buffer);
     });
+  }
+
+  /**
+   * Updates an image's caption in place. Returns the updated metadata, or null
+   * if the image does not exist. GridFSBucket has no metadata-update API, so we
+   * edit the `<bucket>.files` document directly.
+   */
+  static async updateCaption(imageId, caption) {
+    if (!this.isValidId(imageId)) return null;
+    const files = mongoose.connection.db.collection(`${BUCKET_NAME}.files`);
+    const res = await files.updateOne(
+      { _id: toObjectId(imageId) },
+      { $set: { "metadata.caption": caption } }
+    );
+    if (res.matchedCount === 0) return null;
+    return this.getImageMeta(imageId);
   }
 
   /**
@@ -115,6 +133,7 @@ class ImageDAO {
       const buffer = await this.getImageBuffer(f._id.toString());
       out.push({
         filename: f.filename,
+        caption: f.metadata?.caption ?? "",
         contentType: f.metadata?.contentType ?? f.contentType ?? "image/png",
         buffer,
       });

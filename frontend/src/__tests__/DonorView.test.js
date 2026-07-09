@@ -26,6 +26,7 @@ const mockApi = {
     getVersions: vi.fn(() => Promise.resolve({ data: { versionsList: [] } })),
     getImages: vi.fn(() => Promise.resolve({ data: { images: [] } })),
     getImageBlob: vi.fn(() => Promise.resolve({ data: new Blob() })),
+    updateImageCaption: vi.fn(() => Promise.resolve({ data: {} })),
   },
 };
 

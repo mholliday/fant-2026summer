@@ -65,9 +65,10 @@ class DonorDataService {
   }
 
   // ── Image attachments ──────────────────────────────────────────────
-  uploadImage(did, file) {
+  uploadImage(did, file, caption = "") {
     const formData = new FormData();
     formData.append("image", file);
+    if (caption) formData.append("caption", caption);
     // Content-Type is set to undefined so the browser supplies the correct
     // multipart/form-data boundary (overriding the instance's JSON default).
     return this.axios.instance.post(`/donor/${did}/images`, formData, {
@@ -81,6 +82,10 @@ class DonorDataService {
 
   getImageBlob(imageId) {
     return this.axios.instance.get(`/donor/images/${imageId}`, { responseType: "blob" });
+  }
+
+  updateImageCaption(imageId, caption) {
+    return this.axios.instance.patch(`/donor/images/${imageId}`, { caption });
   }
 
   deleteImage(imageId) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Card, Button, Spinner, Alert, Stack } from "react-bootstrap";
+import { Card, Button, Spinner, Alert, Stack, Form } from "react-bootstrap";
 
 // Keep in sync with the backend's per-image limit (donorRoutes.js).
 const MAX_MB = 15;
@@ -110,6 +110,19 @@ export const useDonorImages = (did, api) => {
     document.body.removeChild(a);
   };
 
+  // Update just the caption without re-fetching thumbnails.
+  const handleUpdateCaption = async (imageId, caption) => {
+    setError("");
+    try {
+      await api.donor.updateImageCaption(imageId, caption);
+      setImages((prev) =>
+        prev.map((i) => (i.imageId === imageId ? { ...i, caption } : i))
+      );
+    } catch (err) {
+      setError(err?.response?.data?.message ?? "Failed to update caption");
+    }
+  };
+
   return {
     images,
     urls,
@@ -120,6 +133,7 @@ export const useDonorImages = (did, api) => {
     handleUpload,
     handleDelete,
     handleDownload,
+    handleUpdateCaption,
   };
 };
 
@@ -139,7 +153,22 @@ export const DonorImagesPanel = ({
   handleUpload,
   handleDelete,
   handleDownload,
-}) => (
+  handleUpdateCaption,
+}) => {
+  // Which card's caption is being edited (local to this panel instance) + draft.
+  const [editingId, setEditingId] = useState(null);
+  const [draft, setDraft] = useState("");
+
+  const startEdit = (img) => {
+    setEditingId(img.imageId);
+    setDraft(img.caption ?? "");
+  };
+  const saveEdit = async (img) => {
+    await handleUpdateCaption(img.imageId, draft.trim());
+    setEditingId(null);
+  };
+
+  return (
   <div className="mb-3">
     <h5>{heading}</h5>
     {error && (
@@ -166,7 +195,7 @@ export const DonorImagesPanel = ({
     ) : (
       <div className="d-flex flex-wrap gap-3">
         {images.map((img) => (
-          <Card key={img.imageId} style={{ width: 160 }}>
+          <Card key={img.imageId} style={{ width: 180 }}>
             <div
               style={{
                 height: 120,
@@ -194,6 +223,60 @@ export const DonorImagesPanel = ({
               <div className="text-muted" style={{ fontSize: "0.7rem" }}>
                 {fmtSize(img.size)}
               </div>
+              {editingId === img.imageId ? (
+                <div className="mt-1">
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    autoFocus
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    placeholder="Caption / description"
+                    style={{ fontSize: "0.72rem" }}
+                  />
+                  <Stack direction="horizontal" gap={1} className="mt-1">
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      className="p-1 flex-fill"
+                      style={{ fontSize: "0.7rem" }}
+                      onClick={() => saveEdit(img)}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      className="p-1"
+                      style={{ fontSize: "0.7rem" }}
+                      onClick={() => setEditingId(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </Stack>
+                </div>
+              ) : (
+                <div className="mt-1">
+                  {img.caption ? (
+                    <div style={{ fontSize: "0.72rem", whiteSpace: "pre-wrap" }}>{img.caption}</div>
+                  ) : (
+                    <div className="text-muted fst-italic" style={{ fontSize: "0.7rem" }}>
+                      No caption
+                    </div>
+                  )}
+                  {canEdit && (
+                    <Button
+                      size="sm"
+                      variant="link"
+                      className="p-0"
+                      style={{ fontSize: "0.7rem" }}
+                      onClick={() => startEdit(img)}
+                    >
+                      {img.caption ? "Edit caption" : "Add caption"}
+                    </Button>
+                  )}
+                </div>
+              )}
               <Stack direction="horizontal" gap={1} className="mt-1">
                 <Button
                   size="sm"
@@ -222,7 +305,8 @@ export const DonorImagesPanel = ({
       </div>
     )}
   </div>
-);
+  );
+};
 
 /**
  * Convenience wrapper: owns its own state and renders a single panel.

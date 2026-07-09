@@ -138,7 +138,8 @@ const generateHtml = (donor, images = []) => {
     .legend span { display: inline-block; width: 10px; height: 10px; border: 1px solid #6c757d; vertical-align: middle; }
     .attachment { text-align: center; margin: 8px 0 16px; page-break-inside: avoid; }
     .attachment img { max-width: 100%; max-height: 8.5in; height: auto; border: 1px solid #999; }
-    .attachment-name { font-size: 8px; color: #333; margin-top: 2px; word-break: break-all; }
+    .attachment-caption { font-size: 11px; color: #000; margin-top: 4px; white-space: pre-wrap; }
+    .attachment-name { font-size: 8px; color: #666; margin-top: 2px; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -235,7 +236,9 @@ ${images.length ? `
   ${images
     .map(
       (img) =>
-        `<div class="attachment"><img src="${img.dataUri}" /><div class="attachment-name">${esc(img.filename)}</div></div>`
+        `<div class="attachment"><img src="${img.dataUri}" />${
+          img.caption ? `<div class="attachment-caption">${esc(img.caption)}</div>` : ""
+        }<div class="attachment-name">${esc(img.filename)}</div></div>`
     )
     .join("")}` : ""}
 

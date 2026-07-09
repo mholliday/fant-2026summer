@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button, Stack, Spinner, Alert, Badge, Card, Table, Collapse, Tabs, Tab } from "react-bootstrap";
 import { useAuth, useAPI } from "../contexts/AppContext";
 import { ANALYSIS_FIELDS, ELEMENT_GROUPS, elemKey } from "../services/williamsForm";
-import DonorImages from "./DonorImages";
+import { useDonorImages, DonorImagesPanel } from "./DonorImages";
 
 // Osteometry order follows the Skeletal Analysis numbered list; measurements not on the
 // form are kept but appended at the end of their bone group.
@@ -174,6 +174,9 @@ const DonorView = () => {
   const { canWrite, isAdmin } = useAuth();
   const { api } = useAPI();
   const navigate = useNavigate();
+  // Shared image state so the panel can render in two places (above the tabs
+  // and inside the Skeletal Inventory tab) and stay in sync.
+  const imagesState = useDonorImages(did, api);
 
   const toggleGroup = (group) =>
     setOpenGroups((prev) => ({ ...prev, [group]: !prev[group] }));
@@ -793,8 +796,8 @@ const DonorView = () => {
         </Stack>
       </div>
 
-      {/* Image attachments */}
-      <DonorImages did={did} api={api} canEdit={canWrite && !donor.archived} />
+      {/* Image attachments (also shown inside the Skeletal Inventory tab) */}
+      <DonorImagesPanel canEdit={canWrite && !donor.archived} {...imagesState} />
 
       <Tabs
         activeKey={activeTab}
@@ -802,6 +805,7 @@ const DonorView = () => {
         className="mb-3"
       >
         <Tab eventKey="skeletal" title="Skeletal Inventory">
+          <DonorImagesPanel canEdit={canWrite && !donor.archived} {...imagesState} />
           {skeletalView}
         </Tab>
         <Tab eventKey="williams" title="Skeletal Analysis">

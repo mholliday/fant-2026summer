@@ -13,18 +13,18 @@ const fmtSize = (bytes) => {
 };
 
 /**
- * Image attachments panel for a donor: upload, list (with thumbnails),
- * download, and delete. Thumbnails are fetched as authenticated blobs and
- * shown via object URLs (an <img src> pointing at the API would not carry the
- * auth header). `canEdit` gates upload/delete; download is always available.
+ * Manages a donor's image list + thumbnails as shared state so the panel can
+ * be rendered in more than one place (e.g. above the tabs AND inside the
+ * Skeletal Inventory tab) and stay in sync. Thumbnails are fetched as
+ * authenticated blobs and shown via object URLs (an <img src> pointing at the
+ * API would not carry the auth header).
  */
-const DonorImages = ({ did, api, canEdit }) => {
+export const useDonorImages = (did, api) => {
   const [images, setImages] = useState([]);
   const [urls, setUrls] = useState({}); // imageId -> object URL
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const fileRef = useRef(null);
   const urlsRef = useRef({}); // mirror of `urls` for cleanup
 
   const revokeAll = () => {
@@ -66,7 +66,8 @@ const DonorImages = ({ did, api, canEdit }) => {
   }, [did]);
 
   const handleUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
+    const input = e.target; // reset via the target so panels need no shared ref
+    const files = Array.from(input.files || []);
     if (!files.length) return;
     setError("");
     setUploading(true);
@@ -83,7 +84,7 @@ const DonorImages = ({ did, api, canEdit }) => {
       setError(err?.response?.data?.message ?? "Upload failed");
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
+      if (input) input.value = "";
     }
   };
 
@@ -109,91 +110,126 @@ const DonorImages = ({ did, api, canEdit }) => {
     document.body.removeChild(a);
   };
 
-  return (
-    <div className="mb-3">
-      <h5>Images</h5>
-      {error && (
-        <Alert variant="danger" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
-      {canEdit && (
-        <div className="mb-2 d-flex align-items-center gap-2">
-          <input
-            ref={fileRef}
-            type="file"
-            accept={ACCEPT}
-            multiple
-            onChange={handleUpload}
-            disabled={uploading}
-          />
-          {uploading && <Spinner size="sm" animation="border" />}
-        </div>
-      )}
-      {loading ? (
-        <Spinner size="sm" animation="border" />
-      ) : images.length === 0 ? (
-        <p className="text-muted small mb-0">No images attached.</p>
-      ) : (
-        <div className="d-flex flex-wrap gap-3">
-          {images.map((img) => (
-            <Card key={img.imageId} style={{ width: 160 }}>
-              <div
-                style={{
-                  height: 120,
-                  overflow: "hidden",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "#f8f9fa",
-                }}
-              >
-                {urls[img.imageId] ? (
-                  <img
-                    src={urls[img.imageId]}
-                    alt={img.filename}
-                    style={{ maxWidth: "100%", maxHeight: "100%" }}
-                  />
-                ) : (
-                  <Spinner size="sm" animation="border" />
-                )}
+  return {
+    images,
+    urls,
+    loading,
+    uploading,
+    error,
+    setError,
+    handleUpload,
+    handleDelete,
+    handleDownload,
+  };
+};
+
+/**
+ * Presentational images panel. Takes shared state via props (from
+ * useDonorImages) so multiple instances render the same list in sync.
+ */
+export const DonorImagesPanel = ({
+  canEdit,
+  heading = "Images",
+  images,
+  urls,
+  loading,
+  uploading,
+  error,
+  setError,
+  handleUpload,
+  handleDelete,
+  handleDownload,
+}) => (
+  <div className="mb-3">
+    <h5>{heading}</h5>
+    {error && (
+      <Alert variant="danger" dismissible onClose={() => setError("")}>
+        {error}
+      </Alert>
+    )}
+    {canEdit && (
+      <div className="mb-2 d-flex align-items-center gap-2">
+        <input
+          type="file"
+          accept={ACCEPT}
+          multiple
+          onChange={handleUpload}
+          disabled={uploading}
+        />
+        {uploading && <Spinner size="sm" animation="border" />}
+      </div>
+    )}
+    {loading ? (
+      <Spinner size="sm" animation="border" />
+    ) : images.length === 0 ? (
+      <p className="text-muted small mb-0">No images attached.</p>
+    ) : (
+      <div className="d-flex flex-wrap gap-3">
+        {images.map((img) => (
+          <Card key={img.imageId} style={{ width: 160 }}>
+            <div
+              style={{
+                height: 120,
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#f8f9fa",
+              }}
+            >
+              {urls[img.imageId] ? (
+                <img
+                  src={urls[img.imageId]}
+                  alt={img.filename}
+                  style={{ maxWidth: "100%", maxHeight: "100%" }}
+                />
+              ) : (
+                <Spinner size="sm" animation="border" />
+              )}
+            </div>
+            <Card.Body className="p-2">
+              <div className="small text-truncate" title={img.filename}>
+                {img.filename}
               </div>
-              <Card.Body className="p-2">
-                <div className="small text-truncate" title={img.filename}>
-                  {img.filename}
-                </div>
-                <div className="text-muted" style={{ fontSize: "0.7rem" }}>
-                  {fmtSize(img.size)}
-                </div>
-                <Stack direction="horizontal" gap={1} className="mt-1">
+              <div className="text-muted" style={{ fontSize: "0.7rem" }}>
+                {fmtSize(img.size)}
+              </div>
+              <Stack direction="horizontal" gap={1} className="mt-1">
+                <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  className="p-1 flex-fill"
+                  style={{ fontSize: "0.7rem" }}
+                  onClick={() => handleDownload(img)}
+                >
+                  Download
+                </Button>
+                {canEdit && (
                   <Button
                     size="sm"
-                    variant="outline-secondary"
-                    className="p-1 flex-fill"
+                    variant="outline-danger"
+                    className="p-1"
                     style={{ fontSize: "0.7rem" }}
-                    onClick={() => handleDownload(img)}
+                    onClick={() => handleDelete(img)}
                   >
-                    Download
+                    Delete
                   </Button>
-                  {canEdit && (
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      className="p-1"
-                      style={{ fontSize: "0.7rem" }}
-                      onClick={() => handleDelete(img)}
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </Stack>
-              </Card.Body>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+                )}
+              </Stack>
+            </Card.Body>
+          </Card>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+/**
+ * Convenience wrapper: owns its own state and renders a single panel.
+ */
+const DonorImages = ({ did, api, canEdit, heading }) => {
+  const state = useDonorImages(did, api);
+  return <DonorImagesPanel canEdit={canEdit} heading={heading} {...state} />;
 };
 
 export default DonorImages;

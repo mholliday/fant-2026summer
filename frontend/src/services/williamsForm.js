@@ -6,9 +6,6 @@
 
 // --- Analysis header (top of the Skeletal Analysis packet) ----------------
 export const ANALYSIS_FIELDS = [
-  { key: "cil",          label: "CIL",                                     type: "text" },
-  { key: "analyst",      label: "Analyst",                                 type: "text" },
-  { key: "signature",    label: "Signature / Initials",                    type: "text" },
   { key: "date_started", label: "Date Analysis Started",                   type: "date" },
   { key: "date_ended",   label: "Date Analysis Ended",                     type: "date" },
   { key: "instruments",  label: "Instruments / Equipment Used (Type & ID#)", type: "textarea" },
@@ -123,8 +120,10 @@ export const defaultAnalysis = () =>
 // Maps each inventory element to the bone group id(s) in the public-domain
 // anatomical skeleton SVG (LadyofHats / Mariana Ruiz Villarreal, Wikimedia
 // Commons, released into the public domain). Elements with no matching bone in
-// the figure (teeth, hyoid, sesamoids, individual ribs) are omitted. Used by
-// the Homunculus component and the backend PDF template.
+// the figure (teeth, hyoid, sesamoids, individual ribs) are omitted.
+// NOTE: the interactive skeleton figure that consumed this map has been
+// removed; the map + absentBoneIds are now exercised only by unit tests
+// (see williamsForm.test.js) and kept in case the figure is reintroduced.
 const ARM_BONE_MAP = (side) => ({
   clavicle: [`Clavicle${side}`],
   scapula: ["Scapula"], // figure has a single shared scapula group

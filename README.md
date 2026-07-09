@@ -125,10 +125,6 @@ The app will be available at `http://localhost:3000`. The default admin credenti
 ```
 fant/
 ├── backend/
-│   ├── assets/
-│   │   ├── skeletal_inventory_homunculus.png
-│   │   ├── skeleton.svg
-│   │   └── trauma_homunculus.png
 │   ├── config/
 │   │   └── corsOptions.js
 │   ├── controllers/
@@ -177,7 +173,6 @@ fant/
 │   │   │   ├── AdminPanel.js
 │   │   │   ├── Dashboard.js
 │   │   │   ├── DonorView.js
-│   │   │   ├── Homunculus.js
 │   │   │   ├── Landing.js
 │   │   │   ├── Login.js
 │   │   │   ├── ModifyDonor.js
@@ -214,7 +209,6 @@ fant/
 - `routes/` — Maps incoming requests to the appropriate controllers
 - `scripts/` — Utility scripts (`seedAdmin.js` to bootstrap the first admin user, `migrateRecorderDate.js` for a one-time data migration)
 - `utilities/` — Shared helper functions
-- `assets/` — Images embedded in generated PDFs
 - `reference/` — Blank source forms served to the frontend (skeletal inventory PDF, Skeletal Analysis collection forms)
 - `server.js` — Entry point
 

@@ -1,33 +1,18 @@
 // htmlTemplate.js — generates the donor inventory HTML for PDF export.
 // Page 1: WCU Skeletal Inventory (identification, dentition, bone completeness).
-// Page 2+: Skeletal Analysis form (header, element present/absent, homunculus,
+// Page 2+: Skeletal Analysis form (header, element present/absent,
 //          osteometry, notes).
 //
 // Bug fix: the previous version declared nested skeleton objects (sk.cranial,
 // sk.upper_limbs, …) that never existed in the saved data (which is flat) and
 // were never rendered, so exported PDFs contained no bone inventory at all.
 // This version reads the same flat schema the UI uses.
-const fs = require("fs");
-const path = require("path");
 const {
   ANALYSIS_FIELDS,
   ELEMENT_GROUPS,
   OSTEOMETRY_FIELDS,
   elemKey,
 } = require("./williamsData");
-
-// The two skeletal figures shown on the Skeletal Analysis page (each front + back view).
-// Loaded once and inlined as base64 data URIs so they render in the PDF without
-// depending on a base URL.
-const loadImg = (file) => {
-  try {
-    return `data:image/png;base64,${fs.readFileSync(path.join(__dirname, "..", "assets", file)).toString("base64")}`;
-  } catch {
-    return "";
-  }
-};
-const SKELETAL_HOMUNCULUS_IMG = loadImg("skeletal_inventory_homunculus.png");
-const TRAUMA_HOMUNCULUS_IMG = loadImg("trauma_homunculus.png");
 
 // --- Flat skeletal-inventory schema (mirrors the UI) ----------------------
 const SKULL_SINGLES = [["frontal","Frontal"],["occipital","Occipital"],["ethmoid","Ethmoid"],["vomer","Vomer"],["sphenoid","Sphenoid"],["mandible","Mandible"]];
@@ -156,37 +141,7 @@ const generateHtml = (donor) => {
 <body>
 <div class="document">
 
-  <!-- PAGE 1: Skeletal Analysis form -->
-  <div class="header">
-    <h2 class="title">SKELETAL ANALYSIS — INVENTORY &amp; ANALYSIS</h2>
-    <span class="donor-id">Donor ID: ${esc(donor.donorID)}</span>
-  </div>
-
-  ${hasAnalysis ? `<h3>Analysis</h3><table>${analysisRows}</table>` : ""}
-
-  <h3>Element Inventory</h3>
-  <div class="inv-wrap">${inventoryGroups}</div>
-  ${SKELETAL_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${SKELETAL_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
-
-  ${noteBox("General Observations", notes.general_observations)}
-
-  <div class="pagebreak"></div>
-  <h3>Osteometry <span style="font-size:7px;font-weight:normal">(mm)</span></h3>
-  <div>${osteometryTables}</div>
-
-  ${noteBox("Trauma and Pathological Analysis", notes.trauma_and_pathological_analysis)}
-  ${instrExemplarsHtml("trauma")}
-
-  ${noteBox("General Observations", notes.general_observations_2)}
-  ${instrExemplarsHtml("general_observations_2")}
-
-  ${TRAUMA_HOMUNCULUS_IMG ? `<div style="text-align:center;margin-top:8px"><img src="${TRAUMA_HOMUNCULUS_IMG}" style="max-width:520px;height:auto" /></div>` : ""}
-
-  ${noteBox("Continuation to Skeletal Analysis", notes.continuation)}
-  ${instrExemplarsHtml("continuation")}
-
-  <!-- PAGE 2: WCU Skeletal Inventory -->
-  <div class="pagebreak"></div>
+  <!-- PAGE 1: WCU Skeletal Inventory -->
   <div class="header">
     <h2 class="title">SKELETAL INVENTORY</h2>
     <span class="donor-id">Donor ID: ${esc(donor.donorID)}</span>
@@ -240,6 +195,33 @@ const generateHtml = (donor) => {
   <table><tr><th>Rib</th><th>L</th><th>R</th><th>Rib</th><th>L</th><th>R</th></tr>${ribRows}</table>
 
   ${sk.comments ? `<p class="subhead">Comments</p><div class="box">${esc(sk.comments)}</div>` : ""}
+
+  <!-- PAGE 2: Skeletal Analysis form -->
+  <div class="pagebreak"></div>
+  <div class="header">
+    <h2 class="title">SKELETAL ANALYSIS — INVENTORY &amp; ANALYSIS</h2>
+    <span class="donor-id">Donor ID: ${esc(donor.donorID)}</span>
+  </div>
+
+  ${hasAnalysis ? `<h3>Analysis</h3><table>${analysisRows}</table>` : ""}
+
+  <h3>Element Inventory</h3>
+  <div class="inv-wrap">${inventoryGroups}</div>
+
+  ${noteBox("General Observations", notes.general_observations)}
+
+  <div class="pagebreak"></div>
+  <h3>Osteometry <span style="font-size:7px;font-weight:normal">(mm)</span></h3>
+  <div>${osteometryTables}</div>
+
+  ${noteBox("Trauma and Pathological Analysis", notes.trauma_and_pathological_analysis)}
+  ${instrExemplarsHtml("trauma")}
+
+  ${noteBox("General Observations", notes.general_observations_2)}
+  ${instrExemplarsHtml("general_observations_2")}
+
+  ${noteBox("Continuation to Skeletal Analysis", notes.continuation)}
+  ${instrExemplarsHtml("continuation")}
 
 </div>
 </body>

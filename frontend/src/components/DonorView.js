@@ -3,8 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button, Stack, Spinner, Alert, Badge, Card, Table, Collapse, Tabs, Tab } from "react-bootstrap";
 import { useAuth, useAPI } from "../contexts/AppContext";
 import { ANALYSIS_FIELDS, ELEMENT_GROUPS, elemKey } from "../services/williamsForm";
-import skeletalHomunculusImg from "../assets/skeletal_inventory_homunculus.png";
-import traumaHomunculusImg from "../assets/trauma_homunculus.png";
 
 // Osteometry order follows the Skeletal Analysis numbered list; measurements not on the
 // form are kept but appended at the end of their bone group.
@@ -327,7 +325,7 @@ const DonorView = () => {
         </div>
       )}
 
-      {/* Element Inventory (Present/Absent) + Skeletal Inventory Homunculus */}
+      {/* Element Inventory (Present/Absent) */}
       {hasInventory && (
         <div className="mb-4">
           <Card className="mb-2">
@@ -372,12 +370,6 @@ const DonorView = () => {
                   </Collapse>
                 </Card>
               ))}
-              {/* Skeletal Inventory Homunculus sits at the bottom of the section (per the form) */}
-              <Card className="mb-2">
-                <Card.Body className="text-center">
-                  <img src={skeletalHomunculusImg} alt="Skeletal Inventory Homunculus" style={{ width: "100%", maxWidth: 700, height: "auto" }} />
-                </Card.Body>
-              </Card>
             </div>
           </Collapse>
         </div>
@@ -461,13 +453,6 @@ const DonorView = () => {
           </Card.Body>
         </Card>
       )}
-
-      {/* Trauma and General Observations Homunculus */}
-      <Card className="mb-2 mt-3">
-        <Card.Body className="text-center">
-          <img src={traumaHomunculusImg} alt="Trauma and General Observations Homunculus" style={{ width: "100%", maxWidth: 700, height: "auto" }} />
-        </Card.Body>
-      </Card>
 
       {/* Continuation to Skeletal Analysis */}
       {(notes.continuation || notes.continuation_instruments || notes.continuation_exemplars) && (

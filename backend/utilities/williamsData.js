@@ -4,9 +4,6 @@
 // because the frontend is ESM and this runs under CommonJS).
 
 const ANALYSIS_FIELDS = [
-  { key: "cil",          label: "CIL" },
-  { key: "analyst",      label: "Analyst" },
-  { key: "signature",    label: "Signature / Initials" },
   { key: "date_started", label: "Date Analysis Started" },
   { key: "date_ended",   label: "Date Analysis Ended" },
   { key: "instruments",  label: "Instruments / Equipment Used (Type & ID#)" },

@@ -10,8 +10,6 @@ import {
   defaultElementInventory,
   defaultAnalysis,
 } from "../services/williamsForm";
-import skeletalHomunculusImg from "../assets/skeletal_inventory_homunculus.png";
-import traumaHomunculusImg from "../assets/trauma_homunculus.png";
 
 // Osteometry measurement order follows the Skeletal Analysis form's numbered list
 // (items 1–81). Measurements not on the form are kept but appended at the end
@@ -422,7 +420,7 @@ const ModifyDonor = ({ create = false }) => {
         </div></Collapse>
       </Card>
 
-      {/* Element Inventory (Present/Absent/Observations) + Skeletal Inventory Homunculus */}
+      {/* Element Inventory (Present/Absent/Observations) */}
       <Card className="mb-3">
         <Card.Header onClick={() => toggle("element_inventory")} style={{ cursor: "pointer", userSelect: "none" }} className="d-flex justify-content-between align-items-center">
           <span><strong>Element Inventory</strong><span className="text-muted fw-normal ms-2 small">Present / Absent &amp; observations per element</span></span>
@@ -470,10 +468,6 @@ const ModifyDonor = ({ create = false }) => {
               </div></Collapse>
             </div>
           ))}
-          {/* Skeletal Inventory Homunculus sits at the bottom of the section (per the form) */}
-          <div className="text-center mt-3">
-            <img src={skeletalHomunculusImg} alt="Skeletal Inventory Homunculus" style={{ width: "100%", maxWidth: 700, height: "auto" }} />
-          </div>
         </Card.Body>
         </div></Collapse>
       </Card>
@@ -556,13 +550,6 @@ const ModifyDonor = ({ create = false }) => {
             <Form.Control as="textarea" rows={5} value={notes.general_observations_2} onChange={(e) => handleNotesChange("general_observations_2", e.target.value)} />
           </Form.Group>
           {instrExemplars("general_observations_2")}
-        </Card.Body>
-      </Card>
-
-      {/* Trauma and General Observations Homunculus */}
-      <Card className="mb-3">
-        <Card.Body className="text-center">
-          <img src={traumaHomunculusImg} alt="Trauma and General Observations Homunculus" style={{ width: "100%", maxWidth: 700, height: "auto" }} />
         </Card.Body>
       </Card>
 

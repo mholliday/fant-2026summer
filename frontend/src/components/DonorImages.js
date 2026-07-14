@@ -170,7 +170,7 @@ export const DonorImagesPanel = ({
 
   return (
   <div className="mb-3">
-    <h5>{heading}</h5>
+    {heading ? <h5>{heading}</h5> : null}
     {error && (
       <Alert variant="danger" dismissible onClose={() => setError("")}>
         {error}

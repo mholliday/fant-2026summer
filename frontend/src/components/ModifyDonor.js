@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button, Form, Spinner, Alert, Card, Stack, Table, Collapse, Tabs, Tab } from "react-bootstrap";
 import { useAPI } from "../contexts/AppContext";
 import { toDBSchema } from "../services/donorDataService";
+import DonorImages from "./DonorImages";
 import {
   ANALYSIS_FIELDS,
   ELEMENT_GROUPS,
@@ -1080,10 +1081,15 @@ const ModifyDonor = ({ create = false }) => {
           </Tab>
         </Tabs>
 
-        {create && (
-          <Card className="mb-3">
-            <Card.Header><strong>Images</strong></Card.Header>
-            <Card.Body>
+        <Card className="mb-3">
+          <Card.Header><strong>Images</strong></Card.Header>
+          <Card.Body>
+            {!create ? (
+              // Edit mode: the donor already exists, so upload/caption/delete
+              // happen live against /donor/:did/images via the shared panel.
+              <DonorImages did={donorID} api={api} canEdit heading="" />
+            ) : (
+              <>
               <div className="mb-2">
                 <Form.Control
                   type="file"
@@ -1143,9 +1149,10 @@ const ModifyDonor = ({ create = false }) => {
                   ))}
                 </div>
               )}
-            </Card.Body>
-          </Card>
-        )}
+              </>
+            )}
+          </Card.Body>
+        </Card>
 
         <div className="d-flex justify-content-end gap-2 mb-4">
           <Button variant="outline-secondary" onClick={() => navigate(-1)}>Cancel</Button>

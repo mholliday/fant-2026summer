@@ -13,6 +13,8 @@
       --border: #dee2e6;
       --accent: #0d6efd;
       --accent-soft: #e7f1ff;
+      --warn: #b7791f;
+      --warn-soft: #fff6e5;
       --code-bg: #f1f3f5;
     }
     * { box-sizing: border-box; }
@@ -77,6 +79,13 @@
       border-radius: 6px;
       margin: 1rem 0;
     }
+    .warn-box {
+      background: var(--warn-soft);
+      border-left: 4px solid var(--warn);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
     table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
     th, td { border: 1px solid var(--border); padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
     th { background: var(--code-bg); }
@@ -104,7 +113,7 @@
         <li><a href="#search">Searching for a donor</a></li>
         <li><a href="#viewing">Viewing a donor record</a></li>
         <li><a href="#creating">Creating and editing donors</a></li>
-        <li><a href="#images">Adding images</a></li>
+        <li><a href="#images">Working with images</a></li>
         <li><a href="#archive">Archiving a donor</a></li>
         <li><a href="#pdf">Exporting a PDF</a></li>
         <li><a href="#permissions">What you can and can't do</a></li>
@@ -194,10 +203,23 @@
     </section>
 
     <section id="images">
-      <h2>7. Adding images</h2>
-      <p><em>Requires write access.</em> The <strong>Images</strong> panel sits above the tabs on both the view and
-        edit pages. You can upload photographs and give each one a caption/description. Images appear on the donor's
-        record for anyone who can view it.</p>
+      <h2>7. Working with images</h2>
+      <p>The <strong>Images</strong> panel sits above the tabs on both the view and edit pages. Images appear on the
+        donor's record for anyone who can view it. What you can do depends on your access:</p>
+      <table>
+        <tr><th>Action</th><th>How</th><th>Who</th></tr>
+        <tr><td><strong>Upload</strong></td><td>Use the file picker at the top of the panel. You can select several
+          files at once. Each must be a PNG, JPEG, GIF, or WebP and no larger than 15&nbsp;MB.</td>
+          <td>Write access</td></tr>
+        <tr><td><strong>Add / edit a caption</strong></td><td>Click <span class="btnref ghost">Add caption</span> (or
+          <span class="btnref ghost">Edit caption</span>) on an image card, type a description, and
+          <span class="btnref">Save</span>.</td><td>Write access</td></tr>
+        <tr><td><strong>Delete</strong></td><td>Click the red <span class="btnref">Delete</span> button on the image
+          card and confirm.</td><td>Write access</td></tr>
+        <tr><td><strong>Download</strong></td><td>Click <span class="btnref ghost">Download</span> on the image card to
+          save the original file to your computer.</td><td>Anyone who can view the record</td></tr>
+      </table>
+      <div class="warn-box">Deleting an image is permanent and can't be undone — you'll be asked to confirm first.</div>
     </section>
 
     <section id="archive">

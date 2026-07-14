@@ -45,8 +45,11 @@ const getAllMostRecentDonors = asyncHandler(async (req, res) => {
   let filters = {};
 
   if (req.query.archived !== undefined) {
-    // Bug fix: Boolean("false") === true — compare string explicitly
-    filters.archived = req.query.archived === "true";
+    // Bug fix: Boolean("false") === true — compare explicitly. The archivedFilter
+    // middleware supplies a boolean (true for /archive, false for /donor) while a
+    // raw query string arrives as "true"/"false"; accept both so the Archive view
+    // (boolean true) is not silently treated as archived=false and left empty.
+    filters.archived = req.query.archived === true || req.query.archived === "true";
   }
 
   if (req.query.id) {

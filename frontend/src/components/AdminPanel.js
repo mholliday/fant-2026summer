@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Stack, Alert, Spinner, Modal, Form, Badge } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAPI } from "../contexts/AppContext";
-import { accessLevelToString } from "../utilities/permissions";
+import { accessLevelToString, isImmutable } from "../utilities/permissions";
 
 const AdminPanel = () => {
   const { api } = useAPI();
@@ -155,22 +155,26 @@ const AdminPanel = () => {
                 <Badge bg="secondary" className="ms-1">{u.access}</Badge>
               </td>
               <td>
-                <Stack direction="horizontal" gap={2}>
-                  <Button
-                    size="sm"
-                    variant="outline-warning"
-                    onClick={() => navigate(`/reset-user-password/${u.userID}`)}
-                  >
-                    Reset Password
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-danger"
-                    onClick={() => handleDelete(u.userID, `${u.firstName} ${u.lastName}`)}
-                  >
-                    Delete
-                  </Button>
-                </Stack>
+                {isImmutable(u.access) ? (
+                  <span className="text-muted small fst-italic">Protected super-admin</span>
+                ) : (
+                  <Stack direction="horizontal" gap={2}>
+                    <Button
+                      size="sm"
+                      variant="outline-warning"
+                      onClick={() => navigate(`/reset-user-password/${u.userID}`)}
+                    >
+                      Reset Password
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => handleDelete(u.userID, `${u.firstName} ${u.lastName}`)}
+                    >
+                      Delete
+                    </Button>
+                  </Stack>
+                )}
               </td>
             </tr>
           ))}

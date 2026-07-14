@@ -8,17 +8,18 @@
  */
 const User = require("../models/User");
 
-const IMMUTABLE_ACCESS = 15;
-
 class UserDAO {
   /**
-   * Gets all non-immutable users with pagination.
+   * Gets all users with pagination.
    * Bug fix: error path returned { UsersList: [] } (capital U), success returned { usersList }
+   * Bug fix: previously excluded immutable super-admins (access=15). On a fresh
+   * database the seeded super-admin is the only user, so the Admin Panel showed
+   * "No users found". Immutable users are now listed (the password is still
+   * projected out) and the controller/UI keep them protected from edit/delete.
    */
   static async getUsers({ page = 0, usersPerPage = 10 } = {}) {
     try {
       const [result] = await User.aggregate([
-        { $match: { access: { $ne: IMMUTABLE_ACCESS } } },
         { $project: { _id: 0, password: 0 } },
         {
           $facet: {

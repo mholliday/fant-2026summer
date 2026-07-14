@@ -255,6 +255,46 @@ const ModifyDonor = ({ create = false }) => {
   const [skelOpen, setSkelOpen] = useState({});
   const toggleSkel = (key) => setSkelOpen((prev) => ({ ...prev, [key]: !prev[key] }));
 
+  // Images staged during creation. A donor must exist before images can be
+  // uploaded (uploads target /donor/:did/images), so in create mode we hold the
+  // chosen files + captions locally and upload them right after the donor is
+  // created. Each entry: { file, caption, url } where url is an object URL preview.
+  const [stagedImages, setStagedImages] = useState([]);
+
+  const handleStageImages = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const MAX_MB = 15;
+    const additions = [];
+    for (const file of files) {
+      if (file.size > MAX_MB * 1024 * 1024) {
+        setError(`"${file.name}" exceeds the ${MAX_MB}MB limit`);
+        continue;
+      }
+      additions.push({ file, caption: "", url: URL.createObjectURL(file) });
+    }
+    setStagedImages((prev) => [...prev, ...additions]);
+    e.target.value = "";
+  };
+
+  const handleStagedCaption = (idx, caption) =>
+    setStagedImages((prev) => prev.map((s, i) => (i === idx ? { ...s, caption } : s)));
+
+  const handleRemoveStaged = (idx) =>
+    setStagedImages((prev) => {
+      const removed = prev[idx];
+      if (removed) URL.revokeObjectURL(removed.url);
+      return prev.filter((_, i) => i !== idx);
+    });
+
+  // Revoke any object URLs left over when the form unmounts.
+  useEffect(() => () => {
+    setStagedImages((prev) => {
+      prev.forEach((s) => URL.revokeObjectURL(s.url));
+      return prev;
+    });
+  }, []);
+
   useEffect(() => {
     if (create) {
       api.donor.getNextID().then((res) => setDonorID(res.data.nextID)).catch(console.error);
@@ -330,6 +370,16 @@ const ModifyDonor = ({ create = false }) => {
       const payload = toDBSchema(donorID, donorData);
       if (create) {
         await api.donor.createDonor(payload);
+        // Donor now exists — upload any staged images (best-effort so an image
+        // failure does not strand the user on a form for an already-created donor).
+        for (const s of stagedImages) {
+          try {
+            await api.donor.uploadImage(donorID, s.file, s.caption.trim());
+          } catch (imgErr) {
+            console.error(`Failed to attach "${s.file.name}":`, imgErr);
+          }
+        }
+        stagedImages.forEach((s) => URL.revokeObjectURL(s.url));
       } else {
         await api.donor.updateDonor(payload);
       }
@@ -1029,6 +1079,73 @@ const ModifyDonor = ({ create = false }) => {
             {williamsTab}
           </Tab>
         </Tabs>
+
+        {create && (
+          <Card className="mb-3">
+            <Card.Header><strong>Images</strong></Card.Header>
+            <Card.Body>
+              <div className="mb-2">
+                <Form.Control
+                  type="file"
+                  accept="image/png,image/jpeg,image/gif,image/webp"
+                  multiple
+                  onChange={handleStageImages}
+                />
+                <Form.Text className="text-muted">
+                  Attach one or more images (max 15MB each). They are uploaded when
+                  the donor is created.
+                </Form.Text>
+              </div>
+              {stagedImages.length > 0 && (
+                <div className="d-flex flex-wrap gap-3">
+                  {stagedImages.map((s, idx) => (
+                    <Card key={idx} style={{ width: 180 }}>
+                      <div
+                        style={{
+                          height: 120,
+                          overflow: "hidden",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "#f8f9fa",
+                        }}
+                      >
+                        <img
+                          src={s.url}
+                          alt={s.file.name}
+                          style={{ maxWidth: "100%", maxHeight: "100%" }}
+                        />
+                      </div>
+                      <Card.Body className="p-2">
+                        <div className="small text-truncate" title={s.file.name}>
+                          {s.file.name}
+                        </div>
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          className="mt-1"
+                          value={s.caption}
+                          onChange={(e) => handleStagedCaption(idx, e.target.value)}
+                          placeholder="Caption / description"
+                          style={{ fontSize: "0.72rem" }}
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline-danger"
+                          className="p-1 mt-1 w-100"
+                          style={{ fontSize: "0.7rem" }}
+                          onClick={() => handleRemoveStaged(idx)}
+                        >
+                          Remove
+                        </Button>
+                      </Card.Body>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+        )}
 
         <div className="d-flex justify-content-end gap-2 mb-4">
           <Button variant="outline-secondary" onClick={() => navigate(-1)}>Cancel</Button>

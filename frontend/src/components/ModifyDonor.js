@@ -1068,19 +1068,7 @@ const ModifyDonor = ({ create = false }) => {
           </div></Collapse>
         </Card>
 
-        <Tabs
-          activeKey={activeTab}
-          onSelect={(k) => setActiveTab((prev) => (prev === k ? null : k))}
-          className="mb-3"
-        >
-          <Tab eventKey="skeletal" title="Skeletal Inventory">
-            {skeletalTab}
-          </Tab>
-          <Tab eventKey="williams" title="Skeletal Analysis">
-            {williamsTab}
-          </Tab>
-        </Tabs>
-
+        {/* Images — placed before the tabs to match the donor view page */}
         <Card className="mb-3">
           <Card.Header><strong>Images</strong></Card.Header>
           <Card.Body>
@@ -1153,6 +1141,19 @@ const ModifyDonor = ({ create = false }) => {
             )}
           </Card.Body>
         </Card>
+
+        <Tabs
+          activeKey={activeTab}
+          onSelect={(k) => setActiveTab((prev) => (prev === k ? null : k))}
+          className="mb-3"
+        >
+          <Tab eventKey="skeletal" title="Skeletal Inventory">
+            {skeletalTab}
+          </Tab>
+          <Tab eventKey="williams" title="Skeletal Analysis">
+            {williamsTab}
+          </Tab>
+        </Tabs>
 
         <div className="d-flex justify-content-end gap-2 mb-4">
           <Button variant="outline-secondary" onClick={() => navigate(-1)}>Cancel</Button>

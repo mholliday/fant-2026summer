@@ -1,5 +1,5 @@
 import React from "react";
-import { Card } from "react-bootstrap";
+import { Card, Button } from "react-bootstrap";
 
 const Landing = () => {
   return (
@@ -12,6 +12,15 @@ const Landing = () => {
         <Card.Title>
           Database application for the Forensic Osteology Research Station (FOREST)
         </Card.Title>
+        <Button
+          variant="outline-primary"
+          href="/user-guide.html"
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2"
+        >
+          Help &amp; User Guide
+        </Button>
       </Card.Body>
     </Card>
   );

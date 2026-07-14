@@ -56,6 +56,11 @@ const getAllMostRecentDonors = asyncHandler(async (req, res) => {
     filters.id = req.query.id;
   }
 
+  // Free-text search across the donor's text fields (fuzzy; see donorSearch).
+  if (req.query.q !== undefined && String(req.query.q).trim() !== "") {
+    filters.search = String(req.query.q).trim();
+  }
+
   if (req.query.advanced) {
     try {
       filters.advanced = JSON.parse(req.query.advanced);

@@ -59,6 +59,21 @@ describe("getAllMostRecentDonors", () => {
       expect.objectContaining({ filters: expect.objectContaining({ id:"2026" }) })
     );
   });
+  it("passes a trimmed free-text search term as filters.search", async () => {
+    DonorDAO.getDonors.mockResolvedValue({ donorsList:[], numDonors:0 });
+    const { req, res } = mk({ query: { q: "  knife  " } });
+    await getAllMostRecentDonors(req, res);
+    expect(DonorDAO.getDonors).toHaveBeenCalledWith(
+      expect.objectContaining({ filters: expect.objectContaining({ search: "knife" }) })
+    );
+  });
+  it("ignores a blank search term", async () => {
+    DonorDAO.getDonors.mockResolvedValue({ donorsList:[], numDonors:0 });
+    const { req, res } = mk({ query: { q: "   " } });
+    await getAllMostRecentDonors(req, res);
+    const callArgs = DonorDAO.getDonors.mock.calls.at(-1)[0];
+    expect(callArgs.filters).not.toHaveProperty("search");
+  });
   it("400 for invalid advanced JSON", async () => {
     const { req, res } = mk({ query: { advanced:"not-json" } });
     await getAllMostRecentDonors(req, res);

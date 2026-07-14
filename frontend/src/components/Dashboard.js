@@ -5,7 +5,7 @@
  *  - Adds error state handling
  */
 import React, { useState, useEffect, useCallback } from "react";
-import { Button, Container, Stack, Spinner, Alert } from "react-bootstrap";
+import { Button, Container, Stack, Spinner, Alert, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth, useAPI } from "../contexts/AppContext";
 
@@ -16,6 +16,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showArchive, setShowArchive] = useState(false);
+  // `searchInput` is the live text box; `query` is the submitted term we fetch on.
+  const [searchInput, setSearchInput] = useState("");
+  const [query, setQuery] = useState("");
   const { canWrite, isAdmin } = useAuth();
   const { api } = useAPI();
   const navigate = useNavigate();
@@ -26,8 +29,8 @@ const Dashboard = () => {
       setLoading(true);
       setError("");
       const res = showArchive
-        ? await api.donor.getArchive(page)
-        : await api.donor.getAll(page, donorsPerPage);
+        ? await api.donor.getArchive(page, query)
+        : await api.donor.getAll(page, donorsPerPage, query);
       setDonors(res.data.donors ?? []);
       setTotalResults(res.data.total_results ?? 0);
     } catch (err) {
@@ -35,11 +38,21 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [api, page, showArchive]);
+  }, [api, page, showArchive, query]);
+
+  const submitSearch = (e) => {
+    e.preventDefault();
+    setPage(0);
+    setQuery(searchInput.trim());
+  };
+
+  const clearSearch = () => {
+    setPage(0);
+    setSearchInput("");
+    setQuery("");
+  };
 
   useEffect(() => { fetchDonors(); }, [fetchDonors]);
-
-  if (loading) return <div className="text-center mt-5"><Spinner /></div>;
 
   return (
     <Container>
@@ -52,8 +65,34 @@ const Dashboard = () => {
           {showArchive ? "Back to Dashboard" : "View Archive"}
         </Button>
       </Stack>
+
+      <Form onSubmit={submitSearch} className="mb-3">
+        <Stack direction="horizontal" gap={2}>
+          <Form.Control
+            type="search"
+            placeholder="Search donor text (e.g. Exemplars Used, notes, ancestry)…"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+          <Button type="submit" variant="primary">Search</Button>
+          {query && (
+            <Button type="button" variant="outline-secondary" onClick={clearSearch}>
+              Clear
+            </Button>
+          )}
+        </Stack>
+      </Form>
+
+      {query && (
+        <div className="text-muted small mb-2">
+          Showing {showArchive ? "archived " : ""}donors matching “{query}”.
+        </div>
+      )}
+
       {error && <Alert variant="danger">{error}</Alert>}
-      {donors.length === 0 ? (
+      {loading ? (
+        <div className="text-center mt-5"><Spinner /></div>
+      ) : donors.length === 0 ? (
         <Alert variant="info">No donors found.</Alert>
       ) : (
         <>

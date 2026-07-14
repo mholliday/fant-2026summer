@@ -10,6 +10,7 @@
 const Donor = require("../models/Donor");
 const Version = require("../models/Version");
 const User = require("../models/User");
+const { searchDonors } = require("../utilities/donorSearch");
 
 // Shared aggregation stages for joining users + current version data
 const buildDonorPipeline = (matchStage = {}) => [
@@ -113,19 +114,29 @@ class DonorDAO {
       Object.assign(advSearch, this.prepareQuery(filters.advanced));
     }
 
-    const pipeline = [
+    const basePipeline = [
       ...buildDonorPipeline(matchQuery),
       ...(Object.keys(advSearch).length ? [{ $match: advSearch }] : []),
-      {
-        $facet: {
-          data: [{ $skip: donorsPerPage * page }, { $limit: donorsPerPage }],
-          totalCount: [{ $count: "count" }],
-        },
-      },
     ];
 
     try {
-      const [result] = await Donor.aggregate(pipeline);
+      // Free-text fuzzy search can't be expressed in the aggregation, so when a
+      // search term is present, fetch the (archived/id/advanced-filtered) donors
+      // and match + paginate in JS. The dataset is small enough to scan.
+      if ("search" in filters && String(filters.search).trim() !== "") {
+        const all = await Donor.aggregate(basePipeline);
+        return searchDonors(all, filters.search, page, donorsPerPage);
+      }
+
+      const [result] = await Donor.aggregate([
+        ...basePipeline,
+        {
+          $facet: {
+            data: [{ $skip: donorsPerPage * page }, { $limit: donorsPerPage }],
+            totalCount: [{ $count: "count" }],
+          },
+        },
+      ]);
       const donorsList = result?.data ?? [];
       const numDonors = result?.totalCount?.[0]?.count ?? 0;
       return { donorsList, numDonors };

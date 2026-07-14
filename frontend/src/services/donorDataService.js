@@ -3,8 +3,10 @@ class DonorDataService {
     this.axios = axiosInstance;
   }
 
-  getAll(page = 0, donorsPerPage = 10) {
-    return this.axios.instance.get(`/donor?page=${page}&donorsPerPage=${donorsPerPage}`);
+  getAll(page = 0, donorsPerPage = 10, q = "") {
+    const params = new URLSearchParams({ page, donorsPerPage });
+    if (q) params.append("q", q);
+    return this.axios.instance.get(`/donor?${params.toString()}`);
   }
 
   getByDid(did) {
@@ -36,8 +38,10 @@ class DonorDataService {
     return this.axios.instance.delete(`/donor/archive?did=${did}`);
   }
 
-  getArchive(page = 0) {
-    return this.axios.instance.get(`/donor/archive?page=${page}`);
+  getArchive(page = 0, q = "") {
+    const params = new URLSearchParams({ page });
+    if (q) params.append("q", q);
+    return this.axios.instance.get(`/donor/archive?${params.toString()}`);
   }
 
   restoreArchived(did) {

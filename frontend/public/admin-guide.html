@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FANT — Administrator Guide</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --ink: #212529;
+      --muted: #6c757d;
+      --border: #dee2e6;
+      --accent: #6f42c1;
+      --accent-soft: #efe8fb;
+      --warn: #b7791f;
+      --warn-soft: #fff6e5;
+      --danger: #b02a37;
+      --code-bg: #f1f3f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    header.top {
+      background: #2b1a45;
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+    }
+    header.top .brand { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; }
+    header.top .sub { color: #c9bce0; font-size: 0.95rem; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 1.5rem; }
+    .toc {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .toc h2 { margin: 0 0 0.5rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .toc ol { margin: 0; padding-left: 1.25rem; }
+    .toc a { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    h1 { margin-top: 0; }
+    h2 { margin-top: 0; font-size: 1.35rem; border-bottom: 2px solid var(--accent-soft); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+    code, kbd {
+      background: var(--code-bg);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+    .btnref {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.05rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.85em;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .btnref.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .btnref.warn { background: var(--warn); }
+    .btnref.danger { background: var(--danger); }
+    .note {
+      background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+    .warn-box {
+      background: var(--warn-soft);
+      border-left: 4px solid var(--warn);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+    th { background: var(--code-bg); }
+    td.center, th.center { text-align: center; }
+    ul.tight li, ol.tight li { margin-bottom: 0.35rem; }
+    footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 1.5rem; }
+    a.back { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+    a.back:hover { color: var(--accent); }
+    a.inline { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">FANT — Administrator Guide</div>
+    <div class="sub">Managing users, permissions, and donor records</div>
+  </header>
+
+  <div class="wrap">
+    <p><a class="back" href="/">&larr; Back to the app</a></p>
+
+    <div class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#scope">Who this guide is for</a></li>
+        <li><a href="#panel">Reaching the Admin Panel</a></li>
+        <li><a href="#permissions">Access levels &amp; permissions explained</a></li>
+        <li><a href="#create-user">Creating a user</a></li>
+        <li><a href="#manage-user">Resetting passwords &amp; deleting users</a></li>
+        <li><a href="#superadmin">The protected super-admin</a></li>
+        <li><a href="#donors">Creating and editing donors</a></li>
+        <li><a href="#archive">Archiving, restoring &amp; deleting donors</a></li>
+        <li><a href="#versions">Version history &amp; rollback</a></li>
+        <li><a href="#backup">Backing up and restoring the database</a></li>
+      </ol>
+    </div>
+
+    <section id="scope">
+      <h2>1. Who this guide is for</h2>
+      <p>This guide covers the administrator-only features of FANT. Everything a regular user can do is covered in the
+        <a class="inline" href="/user-guide.html">User Guide</a> — this document only adds the extra powers that come
+        with an admin account: managing users and their permissions, and the full lifecycle of donor records
+        (including restoring and permanently deleting them) plus database backups.</p>
+    </section>
+
+    <section id="panel">
+      <h2>2. Reaching the Admin Panel</h2>
+      <p>When you're logged in with an admin account, an <span class="btnref ghost">Admin Panel</span> link appears in
+        the top navigation bar. It lists every user account and holds the database backup/restore controls. If you
+        don't see the link, your account doesn't have admin access.</p>
+    </section>
+
+    <section id="permissions">
+      <h2>3. Access levels &amp; permissions explained</h2>
+      <p>Each user has an <strong>access level</strong>: a number from <code>0</code> to <code>7</code>. Under the
+        hood it's a set of <strong>bit flags</strong>, where each bit switches one capability on or off. The Admin
+        Panel shows both the 4-digit binary form (e.g. <code>0110</code>) and the number.</p>
+      <table>
+        <tr><th class="center">Bit</th><th>Capability</th><th class="center">Value</th><th>Meaning</th></tr>
+        <tr><td class="center">bit 2</td><td>Read</td><td class="center"><code>4</code></td><td>View donor records, search, export PDFs</td></tr>
+        <tr><td class="center">bit 1</td><td>Write</td><td class="center"><code>2</code></td><td>Create, edit, archive donors; manage images</td></tr>
+        <tr><td class="center">bit 0</td><td>Admin</td><td class="center"><code>1</code></td><td>Admin Panel: users, backups, restore/delete archived records</td></tr>
+        <tr><td class="center">bit 3</td><td>Immutable</td><td class="center"><code>8</code></td><td>Protected account — cannot be edited or deleted (see §6)</td></tr>
+      </table>
+      <p>You add the values together to combine capabilities. The most useful combinations:</p>
+      <table>
+        <tr><th class="center">Level</th><th class="center">Binary</th><th>Grants</th><th>Typical role</th></tr>
+        <tr><td class="center"><code>0</code></td><td class="center">0000</td><td>Nothing</td><td>Disabled / no access</td></tr>
+        <tr><td class="center"><code>4</code></td><td class="center">0100</td><td>Read only</td><td>Viewer / read-only researcher</td></tr>
+        <tr><td class="center"><code>6</code></td><td class="center">0110</td><td>Read + Write</td><td>Lab staff entering and editing records</td></tr>
+        <tr><td class="center"><code>7</code></td><td class="center">0111</td><td>Read + Write + Admin</td><td>Administrator</td></tr>
+      </table>
+      <div class="note">Because capabilities stack, an admin who should also enter data needs <strong>7</strong> (read +
+        write + admin), not <strong>1</strong>. A level of <code>1</code> grants the Admin Panel but <em>not</em> the
+        ability to read or edit donor records.</div>
+      <p>The New User form only accepts levels 0–7, so the immutable bit (8) can't be assigned through the interface.</p>
+    </section>
+
+    <section id="create-user">
+      <h2>4. Creating a user</h2>
+      <ol class="tight">
+        <li>Open the <span class="btnref ghost">Admin Panel</span>.</li>
+        <li>Click <span class="btnref">+ New User</span> at the top right.</li>
+        <li>Fill in <strong>First Name</strong>, <strong>Last Name</strong>, <strong>Username</strong>, and a
+          <strong>Password</strong>.</li>
+        <li>Set the <strong>Access Level (0–7)</strong> using the table in §3 — for example <code>6</code> for a
+          data-entry user or <code>7</code> for another administrator.</li>
+        <li>Click <span class="btnref">Create User</span>. The new account appears immediately in the list.</li>
+      </ol>
+      <div class="note">Give the user their username and initial password directly. They can be prompted to change it,
+        and you can reset it at any time (§5).</div>
+    </section>
+
+    <section id="manage-user">
+      <h2>5. Resetting passwords &amp; deleting users</h2>
+      <p>In the Admin Panel each user row has an <strong>Actions</strong> column:</p>
+      <ul class="tight">
+        <li><span class="btnref warn">Reset Password</span> — opens a form to set a new password for that user.</li>
+        <li><span class="btnref danger">Delete</span> — permanently removes the account after a confirmation prompt.
+          This cannot be undone.</li>
+      </ul>
+      <div class="warn-box">Deleting a user removes their login but does <strong>not</strong> delete the donor records
+        they created — those remain, still attributed to them.</div>
+    </section>
+
+    <section id="superadmin">
+      <h2>6. The protected super-admin</h2>
+      <p>An account whose access level has the <strong>immutable</strong> bit set (value 8, e.g. level <code>15</code>)
+        is a protected super-admin. Its row shows <em>"Protected super-admin"</em> instead of action buttons — it
+        can't be edited or deleted through the interface. This guarantees there is always at least one working admin
+        account. These accounts are provisioned outside the app, not through the New User form.</p>
+    </section>
+
+    <section id="donors">
+      <h2>7. Creating and editing donors</h2>
+      <p>Admins create and edit donors exactly as write-access users do — see the
+        <a class="inline" href="/user-guide.html#creating">User Guide</a> for the full walkthrough. In short: use
+        <span class="btnref">+ New Donor</span> on the Dashboard to create one, or <span class="btnref ghost">Edit</span>
+        on a donor page to change it. Both the Skeletal Inventory and Skeletal Analysis sections, images, dentition,
+        and osteometry are entered through the same form.</p>
+    </section>
+
+    <section id="archive">
+      <h2>8. Archiving, restoring &amp; deleting donors</h2>
+      <h3>Archive</h3>
+      <p>Any write-access user can archive a donor: open it and click <span class="btnref warn">Archive</span>. The
+        record leaves the main Dashboard but is not deleted — it moves to the archive
+        (<span class="btnref ghost">View Archive</span> on the Dashboard).</p>
+      <h3>Restore (admin only)</h3>
+      <p>Open an archived donor and click <span class="btnref">Restore</span> to return it to the active Dashboard.</p>
+      <h3>Delete permanently (admin only)</h3>
+      <p>Open an archived donor and click <span class="btnref danger">Delete Permanently</span>. After you confirm,
+        the record and its history are removed for good.</p>
+      <div class="warn-box">Permanent deletion cannot be undone. Archive rather than delete unless you are certain the
+        record should be gone. Consider taking a backup (§10) first.</div>
+    </section>
+
+    <section id="versions">
+      <h2>9. Version history &amp; rollback</h2>
+      <p>Every save creates a version, listed under <strong>Version History</strong> at the bottom of a donor page.
+        As an admin you'll see a <span class="btnref warn">Restore</span> button next to older versions. Clicking it
+        rolls the record back to that version after a confirmation.</p>
+      <div class="warn-box">Restoring an older version <strong>deletes the versions that came after it</strong>. Newer
+        edits are discarded, so be sure before you roll back.</div>
+    </section>
+
+    <section id="backup">
+      <h2>10. Backing up and restoring the database</h2>
+      <p>The Admin Panel has two database controls above the user list:</p>
+      <ul class="tight">
+        <li><span class="btnref ghost">Backup Database</span> — downloads a single <code>.json</code> file containing
+          all donors, versions, and users. Store it somewhere safe. Do this regularly and before any risky operation.</li>
+        <li><span class="btnref warn">Restore from Backup</span> — choose a previously downloaded backup file to load.</li>
+      </ul>
+      <div class="warn-box"><strong>Restore replaces everything.</strong> Loading a backup overwrites all current
+        donors, versions, and users with the contents of the file. You'll be asked to confirm first. When it finishes,
+        FANT reports how many donors, versions, and users were restored.</div>
+    </section>
+
+    <footer>FANT — Forensic Osteology Research Station · Administrator Guide</footer>
+  </div>
+</body>
+</html>

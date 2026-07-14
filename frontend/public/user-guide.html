@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FANT — User Guide</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --ink: #212529;
+      --muted: #6c757d;
+      --border: #dee2e6;
+      --accent: #0d6efd;
+      --accent-soft: #e7f1ff;
+      --code-bg: #f1f3f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    header.top {
+      background: #212529;
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+    }
+    header.top .brand { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; }
+    header.top .sub { color: #adb5bd; font-size: 0.95rem; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 1.5rem; }
+    .toc {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .toc h2 { margin: 0 0 0.5rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .toc ol { margin: 0; padding-left: 1.25rem; }
+    .toc a { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    h1 { margin-top: 0; }
+    h2 { margin-top: 0; font-size: 1.35rem; border-bottom: 2px solid var(--accent-soft); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+    code, kbd {
+      background: var(--code-bg);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+    .btnref {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.05rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.85em;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .btnref.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .note {
+      background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+    th { background: var(--code-bg); }
+    ul.tight li, ol.tight li { margin-bottom: 0.35rem; }
+    footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 1.5rem; }
+    a.back { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+    a.back:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">FANT — User Guide</div>
+    <div class="sub">Forensic Osteology Research Station (FOREST) donor database</div>
+  </header>
+
+  <div class="wrap">
+    <p><a class="back" href="/">&larr; Back to the app</a></p>
+
+    <div class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#intro">What FANT is</a></li>
+        <li><a href="#login">Logging in and out</a></li>
+        <li><a href="#dashboard">The Dashboard</a></li>
+        <li><a href="#search">Searching for a donor</a></li>
+        <li><a href="#viewing">Viewing a donor record</a></li>
+        <li><a href="#creating">Creating and editing donors</a></li>
+        <li><a href="#images">Adding images</a></li>
+        <li><a href="#archive">Archiving a donor</a></li>
+        <li><a href="#pdf">Exporting a PDF</a></li>
+        <li><a href="#permissions">What you can and can't do</a></li>
+      </ol>
+    </div>
+
+    <section id="intro">
+      <h2>1. What FANT is</h2>
+      <p>FANT is the database application for the Forensic Osteology Research Station (FOREST). It stores a
+        record for each donor, mirroring the two paper forms used in the lab: the <strong>Skeletal Inventory</strong>
+        form and the <strong>Skeletal Analysis</strong> (John A. Williams Collection) form. Each record keeps a full
+        version history, so every change is tracked.</p>
+    </section>
+
+    <section id="login">
+      <h2>2. Logging in and out</h2>
+      <ol class="tight">
+        <li>Open the app and click <span class="btnref ghost">Log In</span> in the top navigation bar.</li>
+        <li>Enter the username and password given to you by an administrator, then submit.</li>
+        <li>Once signed in, your name appears at the top right. Click <span class="btnref ghost">Log Out</span>
+          when you're finished.</li>
+      </ol>
+      <div class="note">Don't have an account? Accounts are created by an administrator — see your lab admin.</div>
+    </section>
+
+    <section id="dashboard">
+      <h2>3. The Dashboard</h2>
+      <p>After you log in, the <strong>Dashboard</strong> lists all active donor records, 10 per page. Each row shows the
+        Donor ID, who created it, when it was last modified, who modified it, and how many saved versions exist.</p>
+      <ul class="tight">
+        <li><strong>Open a record</strong> — click anywhere on a row.</li>
+        <li><strong>Change pages</strong> — use <span class="btnref ghost">Previous</span> /
+          <span class="btnref ghost">Next</span> at the bottom.</li>
+        <li><strong>View archived donors</strong> — click <span class="btnref ghost">View Archive</span>. Click
+          <span class="btnref ghost">Back to Dashboard</span> to return.</li>
+      </ul>
+    </section>
+
+    <section id="search">
+      <h2>4. Searching for a donor</h2>
+      <p>Use the search box above the list to find donors by their text content — for example notes, ancestry,
+        exemplars used, or other free-text fields. Type a term and click <span class="btnref">Search</span>.
+        The search is <em>fuzzy</em>, so close spellings still match. Click <span class="btnref ghost">Clear</span>
+        to return to the full list. Search works on the archive too while the archive is showing.</p>
+    </section>
+
+    <section id="viewing">
+      <h2>5. Viewing a donor record</h2>
+      <p>A donor page is organized top to bottom:</p>
+      <ul class="tight">
+        <li><strong>Metadata</strong> — created/modified by and when, and the number of versions.</li>
+        <li><strong>Reference Forms</strong> — download the blank original Skeletal Analysis and Skeletal Inventory
+          forms for comparison.</li>
+        <li><strong>Images</strong> — photographs attached to the record (see below).</li>
+        <li><strong>Two tabs</strong> — <em>Skeletal Inventory</em> and <em>Skeletal Analysis</em>. Click a tab to
+          open it; click it again to collapse it. Inside, each section (Cranium, Dentition, Long Bones, Osteometry,
+          etc.) expands and collapses when you click its header.</li>
+        <li><strong>Version History</strong> — at the bottom, a list of every saved change to the record.</li>
+      </ul>
+      <h3>Reading the codes</h3>
+      <table>
+        <tr><th>Where</th><th>Codes</th></tr>
+        <tr><td>Skeletal Inventory (bone completeness)</td><td><code>1</code> = 100%, <code>2</code> = 75–99%,
+          <code>3</code> = 25–74%, <code>4</code> = &lt;25%, <code>5</code> = absent</td></tr>
+        <tr><td>Dentition (each tooth)</td><td><code>A</code> = antemortem absence, <code>P</code> = postmortem
+          absence, <code>N</code> = natural (present), <code>D</code> = dental work; wear score 1–5</td></tr>
+        <tr><td>Element Inventory</td><td>each element is marked <code>Present</code> or <code>Absent</code></td></tr>
+      </table>
+    </section>
+
+    <section id="creating">
+      <h2>6. Creating and editing donors</h2>
+      <p><em>Requires write access.</em> If you have it, you'll see the relevant buttons.</p>
+      <h3>Create a new donor</h3>
+      <ol class="tight">
+        <li>On the Dashboard, click <span class="btnref">+ New Donor</span>.</li>
+        <li>Fill in the form. It's split into the same sections you see when viewing a record.</li>
+        <li>Save the record when you're done.</li>
+      </ol>
+      <h3>Edit an existing donor</h3>
+      <ol class="tight">
+        <li>Open the donor, then click <span class="btnref ghost">Edit</span> at the top.</li>
+        <li>Make your changes and save.</li>
+      </ol>
+      <div class="note">Every save creates a new entry in the record's <strong>Version History</strong>, so earlier
+        states are never lost.</div>
+    </section>
+
+    <section id="images">
+      <h2>7. Adding images</h2>
+      <p><em>Requires write access.</em> The <strong>Images</strong> panel sits above the tabs on both the view and
+        edit pages. You can upload photographs and give each one a caption/description. Images appear on the donor's
+        record for anyone who can view it.</p>
+    </section>
+
+    <section id="archive">
+      <h2>8. Archiving a donor</h2>
+      <p><em>Requires write access.</em> Archiving removes a donor from the main Dashboard without deleting it.
+        Open the donor and click <span class="btnref ghost">Archive</span>. The record then appears under
+        <span class="btnref ghost">View Archive</span>. Only an administrator can restore an archived donor or delete
+        it permanently.</p>
+    </section>
+
+    <section id="pdf">
+      <h2>9. Exporting a PDF</h2>
+      <p>On any donor page, click <span class="btnref ghost">Export PDF</span> to download a printable copy of the
+        record. This works whether or not you have write access.</p>
+    </section>
+
+    <section id="permissions">
+      <h2>10. What you can and can't do</h2>
+      <p>Your account has an <strong>access level</strong> set by an administrator. It controls what you see:</p>
+      <table>
+        <tr><th>If your account has…</th><th>You can…</th></tr>
+        <tr><td>Read access</td><td>View donor records, search, browse the archive, and export PDFs.</td></tr>
+        <tr><td>Write access</td><td>Everything above, plus create, edit, archive donors, and manage images.</td></tr>
+        <tr><td>Admin access</td><td>Everything above, plus the Admin Panel (users, backups, restoring/deleting
+          archived records).</td></tr>
+      </table>
+      <p>If a button described in this guide doesn't appear for you, your account doesn't have that level of access.
+        Contact an administrator if you need it changed.</p>
+    </section>
+
+    <footer>FANT — Forensic Osteology Research Station · User Guide</footer>
+  </div>
+</body>
+</html>

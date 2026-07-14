@@ -1,5 +1,5 @@
 import React from "react";
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import { Navbar, Nav, Container, Button, NavDropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AppContext";
 
@@ -33,6 +33,16 @@ const NavigationBar = () => {
             </Nav>
           )}
           <Nav className="ms-auto">
+            <NavDropdown title="Help" id="help-nav" align="end">
+              <NavDropdown.Item href="/user-guide.html" target="_blank" rel="noreferrer">
+                User Guide
+              </NavDropdown.Item>
+              {isAdmin && (
+                <NavDropdown.Item href="/admin-guide.html" target="_blank" rel="noreferrer">
+                  Administrator Guide
+                </NavDropdown.Item>
+              )}
+            </NavDropdown>
             {user ? (
               <>
                 <Navbar.Text className="me-2">
